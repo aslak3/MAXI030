@@ -1,0 +1,182 @@
+#!/bin/sh
+
+export TERM=vt100
+
+SUITE=sarge
+
+if [ "$SUITE" = "sid" ]; then
+	DPKG_OPTS=--allow-unauthenticated
+	FS=ext4
+else
+	DPKG_OPTS=
+	FS=ext3
+fi
+
+DIR=/tmp/targetdir-$SUITE
+
+mkdir $DIR
+multistrap -a m68k -d $DIR -f multistrap.conf.$SUITE
+
+cat <<END >>$DIR/etc/fstab
+/dev/sda1  swap        swap     defaults  0  0
+/dev/sda2  /           $FS     noatime   1  1
+devpts     /dev/pts    devpts   defaults  0  0
+proc       /proc       proc     defaults  0  0
+END
+
+chroot $DIR mount /proc
+
+echo "nameserver 10.52.0.2" > $DIR/etc/resolv.conf
+
+chroot $DIR mknod -m 622 /dev/console c 5 1
+chroot $DIR mknod -m 666 /dev/null c 1 3
+chroot $DIR mknod -m 666 /dev/zero c 1 5
+chroot $DIR mknod -m 666 /dev/ptmx c 5 2
+chroot $DIR mknod -m 666 /dev/tty c 5 0
+chroot $DIR mknod -m 444 /dev/random c 1 8
+chroot $DIR mknod -m 444 /dev/urandom c 1 9
+
+echo 'Europe/London' > $DIR/etc/timezone
+
+chroot $DIR dpkg --configure -a
+
+echo "maxi030.local" > $DIR/etc/hostname
+if [ "$SUITE" != "sarge" ]; then
+	cat <<END >$DIR/etc/apt/apt.conf.d/99-enable-unsecure-repos
+Acquire::Check-Valid-Until "false";
+Acquire::AllowInsecureRepositories "true";
+Acquire::AllowDowngradeToInsecureRepositories "true";
+END
+fi
+
+if [ "$SUITE" = "etch" ]; then
+	echo "deb http://archive.debian.org/debian etch-m68k main" > $DIR/etc/apt/sources.list
+elif [ "$SUITE" = "sarge" ]; then
+	echo "deb http://archive.debian.org/debian sarge main" > $DIR/etc/apt/sources.list
+fi
+
+chroot $DIR apt-get update
+
+mkdir -p $DIR/dev/pts
+
+chroot $DIR mv /sbin/start-stop-daemon /
+chroot $DIR ln -s /bin/true /sbin/start-stop-daemon
+
+if [ "$SUITE" = "sid" ]; then
+	EXTRA_MOD = "kmod";
+elif [ "$SUITE" = "sarge" ]; then
+	EXTRA_MOD = "apt-utils lm-sensors"
+fi
+
+for P in libterm-readline-perl-perl deb-conf tcpdump openssh-client openssh-server \
+	ssh bzip2 findutils tmux net-tools ftp build-essential dialog iftop \
+	ifupdown adduser iperf iproute2 iputils-ping joe strace telnet links \
+	man procps top sysvinit-core makedev inetutils-syslogd hdparm \
+	wget ircii less adduser vim nano apache2 ntpdate screen \
+	nethack-console fortune mtd-tools $EXTRA_MODS;
+do
+	RUNLEVEL=1 chroot $DIR apt-get install -y $DPKG_OPTS $P
+done
+
+chroot $DIR rm /sbin/start-stop-daemon
+chroot $DIR mv /start-stop-daemon /sbin
+
+chroot $DIR dpkg --configure -a
+
+chroot $DIR chown -v root:tty /dev/console
+chroot $DIR chown -v root:tty /dev/ptmx
+chroot $DIR chown -v root:tty /dev/tty
+
+if [ "$SUITE" = "sid" ]; then
+	cat <<END >$DIR/etc/inittab
+id:2:initdefault:
+
+si::sysinit:/etc/init.d/rcS
+
+~~:S:wait:/sbin/sulogin --force
+
+l0:0:wait:/etc/init.d/rc 0
+l1:1:wait:/etc/init.d/rc 1
+l2:2:wait:/etc/init.d/rc 2
+l3:3:wait:/etc/init.d/rc 3
+l4:4:wait:/etc/init.d/rc 4
+l5:5:wait:/etc/init.d/rc 5
+l6:6:wait:/etc/init.d/rc 6
+z6:6:respawn:/sbin/sulogin --force
+
+ca:12345:ctrlaltdel:/sbin/shutdown -t1 -a -r now
+
+pf::powerwait:/etc/init.d/powerfail start
+pn::powerfailnow:/etc/init.d/powerfail now
+po::powerokwait:/etc/init.d/powerfail stop
+
+T0:2345:respawn:/sbin/agetty -L ttySC0 38400 vt100
+T1:2345:respawn:/sbin/agetty -L ttySC1 38400 vt100
+END
+else
+	cat <<END >$DIR/etc/inittab
+id:2:initdefault:                                                               
+
+si::sysinit:/etc/init.d/rcS                                                     
+
+~:S:wait:/sbin/sulogin                                                         
+
+l0:0:wait:/etc/init.d/rc 0                                                      
+l1:1:wait:/etc/init.d/rc 1                                                      
+l2:2:wait:/etc/init.d/rc 2                                                      
+l3:3:wait:/etc/init.d/rc 3                                                      
+l4:4:wait:/etc/init.d/rc 4                                                      
+l5:5:wait:/etc/init.d/rc 5                                                      
+l6:6:wait:/etc/init.d/rc 6                                                      
+
+z6:6:respawn:/sbin/sulogin                                                      
+
+ca:12345:ctrlaltdel:/sbin/shutdown -t1 -a -r now                                
+
+pf::powerwait:/etc/init.d/powerfail start                                       
+pn::powerfailnow:/etc/init.d/powerfail now                                      
+po::powerokwait:/etc/init.d/powerfail stop                                      
+
+T0:23:respawn:/sbin/getty -L ttySC0 38400 vt100                                 
+T1:23:respawn:/sbin/getty -L ttySC1 38400 vt100
+END
+fi
+
+cat <<END >>$DIR/etc/network/interfaces
+# The loopback network interface
+auto lo eth0
+iface lo inet loopback
+
+# The primary network interface
+allow-hotplug eth0
+iface eth0 inet static
+	address 10.52.0.10
+	netmask 255.255.255.0
+	network 10.52.0.0
+	broadcast 10.52.0.255
+	gateway 10.52.0.1
+END
+
+mkdir $DIR/etc/inittab.d
+
+cat <<END >$DIR/etc/securetty
+ttySC0
+ttySC1
+END
+
+rm -f $DIR/etc/mtab
+ln -s /proc/mounts $DIR/etc/mtab
+
+chroot $DIR apt-get clean
+
+echo root:password | chroot $DIR chpasswd -m
+chroot $DIR adduser --disabled-password --gecos "" lawrence
+echo lawrence:password | chroot $DIR chpasswd -m
+
+if [ "$SUITE" != "sid" ]; then
+	ln -s xterm-color $DIR/usr/share/teminfo/x/xterm-256color
+fi
+
+cp -avR lib $DIR
+
+chroot $DIR umount /proc
