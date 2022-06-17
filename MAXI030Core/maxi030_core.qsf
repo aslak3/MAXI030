@@ -1,0 +1,243 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2009 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II
+# Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
+# Date created = 10:04:40  June 16, 2021
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		maxi030_core_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY FLEX10KE
+set_global_assignment -name DEVICE "EPF10K130EQC240-1"
+set_global_assignment -name TOP_LEVEL_ENTITY maxi030_core
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "9.0 SP2"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "10:04:40  JUNE 16, 2021"
+set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
+set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
+set_global_assignment -name DEVICE_FILTER_PACKAGE "ANY QFP"
+set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 1
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 240
+set_global_assignment -name INCREMENTAL_COMPILATION OFF
+set_global_assignment -name FLEX10K_DEVICE_IO_STANDARD LVTTL/LVCMOS
+set_location_assignment PIN_6 -to ps2a_clock
+set_location_assignment PIN_7 -to ps2a_data
+set_location_assignment PIN_174 -to addr[0]
+set_location_assignment PIN_173 -to addr[1]
+set_location_assignment PIN_172 -to addr[2]
+set_location_assignment PIN_171 -to addr[3]
+set_location_assignment PIN_169 -to addr[4]
+set_location_assignment PIN_168 -to addr[5]
+set_location_assignment PIN_167 -to addr[6]
+set_location_assignment PIN_166 -to addr[7]
+set_location_assignment PIN_164 -to addr[8]
+set_location_assignment PIN_163 -to addr[9]
+set_location_assignment PIN_162 -to addr[10]
+set_location_assignment PIN_161 -to addr[11]
+set_location_assignment PIN_158 -to addr[12]
+set_location_assignment PIN_157 -to addr[13]
+set_location_assignment PIN_156 -to addr[14]
+set_location_assignment PIN_154 -to addr[15]
+set_location_assignment PIN_153 -to addr[16]
+set_location_assignment PIN_152 -to addr[17]
+set_location_assignment PIN_151 -to addr[18]
+set_location_assignment PIN_149 -to addr[19]
+set_location_assignment PIN_148 -to addr[20]
+set_location_assignment PIN_147 -to addr[21]
+set_location_assignment PIN_146 -to addr[22]
+set_location_assignment PIN_144 -to addr[23]
+set_location_assignment PIN_143 -to addr[24]
+set_location_assignment PIN_142 -to addr[25]
+set_location_assignment PIN_141 -to addr[26]
+set_location_assignment PIN_139 -to addr[27]
+set_location_assignment PIN_138 -to addr[28]
+set_location_assignment PIN_137 -to addr[29]
+set_location_assignment PIN_136 -to addr[30]
+set_location_assignment PIN_134 -to addr[31]
+set_location_assignment PIN_30 -to buzzer
+set_location_assignment PIN_91 -to clock
+set_location_assignment PIN_46 -to data[31]
+set_location_assignment PIN_45 -to data[30]
+set_location_assignment PIN_44 -to data[29]
+set_location_assignment PIN_43 -to data[28]
+set_location_assignment PIN_41 -to data[27]
+set_location_assignment PIN_40 -to data[26]
+set_location_assignment PIN_39 -to data[25]
+set_location_assignment PIN_38 -to data[24]
+set_location_assignment PIN_111 -to data[23]
+set_location_assignment PIN_110 -to data[22]
+set_location_assignment PIN_109 -to data[21]
+set_location_assignment PIN_108 -to data[20]
+set_location_assignment PIN_107 -to data[19]
+set_location_assignment PIN_106 -to data[18]
+set_location_assignment PIN_105 -to data[17]
+set_location_assignment PIN_103 -to data[16]
+set_location_assignment PIN_56 -to data[15]
+set_location_assignment PIN_55 -to data[14]
+set_location_assignment PIN_54 -to data[13]
+set_location_assignment PIN_53 -to data[12]
+set_location_assignment PIN_51 -to data[11]
+set_location_assignment PIN_50 -to data[10]
+set_location_assignment PIN_49 -to data[9]
+set_location_assignment PIN_48 -to data[8]
+set_location_assignment PIN_88 -to data[7]
+set_location_assignment PIN_86 -to data[5]
+set_location_assignment PIN_84 -to data[4]
+set_location_assignment PIN_83 -to data[3]
+set_location_assignment PIN_82 -to data[2]
+set_location_assignment PIN_81 -to data[1]
+set_location_assignment PIN_80 -to data[0]
+set_location_assignment PIN_87 -to data[6]
+set_location_assignment PIN_115 -to fc[2]
+set_location_assignment PIN_114 -to fc[1]
+set_location_assignment PIN_113 -to fc[0]
+set_location_assignment PIN_29 -to led
+set_location_assignment PIN_119 -to n_as
+set_location_assignment PIN_194 -to n_avec
+set_location_assignment PIN_132 -to n_berr
+set_location_assignment PIN_235 -to n_berre
+set_location_assignment PIN_66 -to n_cas[3]
+set_location_assignment PIN_67 -to n_cas[2]
+set_location_assignment PIN_65 -to n_cas[1]
+set_location_assignment PIN_68 -to n_cas[0]
+set_location_assignment PIN_196 -to n_cback
+set_location_assignment PIN_195 -to n_cbreq
+set_location_assignment PIN_198 -to n_ciin
+set_location_assignment PIN_120 -to n_ds
+set_location_assignment PIN_191 -to n_dsack[1]
+set_location_assignment PIN_192 -to n_dsack[0]
+set_location_assignment PIN_25 -to n_eth
+set_location_assignment PIN_14 -to n_eth_int
+set_location_assignment PIN_199 -to n_fpu
+set_location_assignment PIN_200 -to n_fpu_sense
+set_location_assignment PIN_131 -to n_halt
+set_location_assignment PIN_223 -to n_iacke[3]
+set_location_assignment PIN_225 -to n_iacke[2]
+set_location_assignment PIN_226 -to n_iacke[1]
+set_location_assignment PIN_227 -to n_iacke[0]
+set_location_assignment PIN_15 -to n_ide
+set_location_assignment PIN_34 -to n_ide1
+set_location_assignment PIN_33 -to n_ide3
+set_location_assignment PIN_240 -to n_ide_dma_ack
+set_location_assignment PIN_236 -to n_ide_dma_req
+set_location_assignment PIN_31 -to n_ide_irq
+set_location_assignment PIN_210 -to n_ide_ready
+set_location_assignment PIN_228 -to n_inte[3]
+set_location_assignment PIN_229 -to n_inte[2]
+set_location_assignment PIN_230 -to n_inte[1]
+set_location_assignment PIN_231 -to n_inte[0]
+set_location_assignment PIN_92 -to n_ipend
+set_location_assignment PIN_187 -to n_ipl[2]
+set_location_assignment PIN_184 -to n_ipl[1]
+set_location_assignment PIN_175 -to n_ipl[0]
+set_location_assignment PIN_222 -to n_lcse[3]
+set_location_assignment PIN_220 -to n_lcse[2]
+set_location_assignment PIN_218 -to n_lcse[1]
+set_location_assignment PIN_215 -to n_lcse[0]
+set_location_assignment PIN_203 -to n_lexp
+set_location_assignment PIN_28 -to n_lrom
+set_location_assignment PIN_13 -to n_quart
+set_location_assignment PIN_212 -to n_quart_dtack
+set_location_assignment PIN_237 -to n_quart_iack
+set_location_assignment PIN_12 -to n_quart_irq
+set_location_assignment PIN_71 -to n_ras0[3]
+set_location_assignment PIN_70 -to n_ras0[2]
+set_location_assignment PIN_61 -to n_ras0[1]
+set_location_assignment PIN_63 -to n_ras0[0]
+set_location_assignment PIN_73 -to n_ras1[3]
+set_location_assignment PIN_72 -to n_ras1[2]
+set_location_assignment PIN_62 -to n_ras1[1]
+set_location_assignment PIN_64 -to n_ras1[0]
+set_location_assignment PIN_207 -to n_read
+set_location_assignment PIN_129 -to n_reset
+set_location_assignment PIN_90 -to n_rmc
+set_location_assignment PIN_36 -to n_simm
+set_location_assignment PIN_35 -to n_simm_we
+set_location_assignment PIN_193 -to n_sterm
+set_location_assignment PIN_221 -to n_ucse[3]
+set_location_assignment PIN_219 -to n_ucse[2]
+set_location_assignment PIN_217 -to n_ucse[1]
+set_location_assignment PIN_214 -to n_ucse[0]
+set_location_assignment PIN_204 -to n_uexp
+set_location_assignment PIN_17 -to n_urom
+set_location_assignment PIN_234 -to n_waite
+set_location_assignment PIN_208 -to n_write
+set_location_assignment PIN_26 -to p_reset
+set_location_assignment PIN_9 -to ps2b_clock
+set_location_assignment PIN_8 -to ps2b_data
+set_location_assignment PIN_118 -to rn_w
+set_location_assignment PIN_206 -to rtc_square
+set_location_assignment PIN_202 -to scl
+set_location_assignment PIN_201 -to sda
+set_location_assignment PIN_78 -to simm_addr[11]
+set_location_assignment PIN_94 -to simm_addr[10]
+set_location_assignment PIN_74 -to simm_addr[9]
+set_location_assignment PIN_75 -to simm_addr[8]
+set_location_assignment PIN_79 -to simm_addr[7]
+set_location_assignment PIN_95 -to simm_addr[6]
+set_location_assignment PIN_97 -to simm_addr[5]
+set_location_assignment PIN_98 -to simm_addr[4]
+set_location_assignment PIN_99 -to simm_addr[3]
+set_location_assignment PIN_100 -to simm_addr[2]
+set_location_assignment PIN_101 -to simm_addr[1]
+set_location_assignment PIN_102 -to simm_addr[0]
+set_location_assignment PIN_117 -to siz[1]
+set_location_assignment PIN_116 -to siz[0]
+set_location_assignment PIN_233 -to sys_clear
+set_location_assignment PIN_133 -to temp_alert
+set_location_assignment PIN_127 -to n_bg
+set_location_assignment PIN_128 -to n_bgack
+set_location_assignment PIN_126 -to n_br
+set_location_assignment PIN_239 -to n_ide_read
+set_location_assignment PIN_238 -to n_ide_write
+set_location_assignment PIN_24 -to user[4]
+set_location_assignment PIN_23 -to user[3]
+set_location_assignment PIN_21 -to user[2]
+set_location_assignment PIN_19 -to user[1]
+set_location_assignment PIN_18 -to user[0]
+set_global_assignment -name FLEX10K_OPTIMIZATION_TECHNIQUE SPEED
+set_global_assignment -name FMAX_REQUIREMENT "40 MHz" -section_id CLOCK
+set_instance_assignment -name CLOCK_SETTINGS CLOCK -to clock
+set_global_assignment -name ALLOW_POWER_UP_DONT_CARE OFF
+set_global_assignment -name REMOVE_REDUNDANT_LOGIC_CELLS OFF
+set_global_assignment -name ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION OFF
+set_global_assignment -name HDL_MESSAGE_LEVEL LEVEL3
+set_global_assignment -name MISC_FILE maxi030_core.dpf
+set_global_assignment -name VHDL_FILE ps2_fifo.vhd
+set_global_assignment -name VHDL_FILE spi.vhd
+set_global_assignment -name VHDL_FILE i2c.vhd
+set_global_assignment -name VHDL_FILE maxi030_core.vhd
+set_global_assignment -name VHDL_FILE ps2_controller.vhd
+set_global_assignment -name VHDL_FILE simm_controller.vhd
+set_global_assignment -name VHDL_FILE timer.vhd
+set_global_assignment -name QIP_FILE ps2_fifo.qip
+set_global_assignment -name VHDL_FILE uart.vhd
+set_global_assignment -name MISC_FILE "C:/MAXI030Core/maxi030_core.dpf"

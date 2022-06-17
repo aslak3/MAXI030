@@ -1,0 +1,87 @@
+Restore Archived Project report for maxi030_core
+Fri Jun 17 11:09:32 2022
+Quartus II Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Restore Archived Project Summary
+  3. Restore Archived Project Messages
+  4. Files Restored
+  5. Files Not Restored
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2009 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++-------------------------------------------------------------------------+
+; Restore Archived Project Summary                                        ;
++---------------------------------+---------------------------------------+
+; Restore Archived Project Status ; Successful - Fri Jun 17 11:09:32 2022 ;
+; Revision Name                   ; maxi030_core                          ;
+; Top-level Entity Name           ; maxi030_core                          ;
+; Family                          ; FLEX10KE                              ;
++---------------------------------+---------------------------------------+
+
+
++-----------------------------------+
+; Restore Archived Project Messages ;
++-----------------------------------+
+Info: Successfully restored 'C:/Users/Lawrence/Documents/Altera Projects/MAXI030Core/maxi030_core.qar' into the 'C:/foo/' directory
+Info: Generated report 'maxi030_core.restore.rpt'
+Info: Evaluation of Tcl script c:/altera/90sp2/quartus/common/tcl/apps/qpm/qar.tcl was successful
+Info: Quartus II Shell was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 129 megabytes
+    Info: Processing ended: Fri Jun 17 11:09:32 2022
+    Info: Elapsed time: 00:00:01
+    Info: Total CPU time (on all processors): 00:00:00
+
+
++-------------------------+
+; Files Restored          ;
++-------------------------+
+; File Name               ;
++-------------------------+
+; MAXI030Core.qpf         ;
+; i2c.vhd                 ;
+; maxi030_core.dpf        ;
+; maxi030_core.qsf        ;
+; maxi030_core.vhd        ;
+; ps2_controller.vhd      ;
+; ps2_fifo.cmp            ;
+; ps2_fifo.qip            ;
+; ps2_fifo.vhd            ;
+; simm_controller.vhd     ;
+; spi.vhd                 ;
+; timer.vhd               ;
+; uart.vhd                ;
+; assignment_defaults.qdf ;
++-------------------------+
+
+
++--------------------+
+; Files Not Restored ;
++--------------------+
+; File Name          ;
++--------------------+
+
+
