@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name TestSRAM-rescue)(type Legacy)(uri ${KIPRJMOD}/TestSRAM-rescue.lib)(options "")(descr ""))
+)

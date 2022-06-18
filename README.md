@@ -25,7 +25,7 @@ The specification for MAXI030, a [MC68030](https://www.nxp.com/docs/en/reference
 * [IDE](https://en.wikipedia.org/wiki/Parallel_ATA) with DMA signals routed to the FPGA, though they are currently not utilised
 * A [P7805-2000-S](https://www.mouser.co.uk/datasheet/2/670/p78_2000_s-1729053.pdf) 2A 5V potted switching regulator attached to a barrel jack
 
-A [schematic](MAXI030.pdf) is included here, along with the [KiCAD](https://www.kicad.org) data files. Note that schematic symbols are included in the library cache.
+A [schematic](MAXI030.pdf) is included here, along with the [KiCAD](https://www.kicad.org) data files. Note that schematic symbols are included in the library cache. Whilst these boards were designed with KiCAD 4, the files in this repository are all KiCAD 6 format.
 
 ## PCB design
 
@@ -56,6 +56,18 @@ The code for this functionality resides in the [MAXI030Core directory](MAXI030Co
 As this is FPGA hardware, many other things could be implemented. In particular, the FPGA is wired to the full 32 bits of address and data, so a bus-mastering DMA controller could be constructed. This could be used for disk transfers, amongst other things, which would greatly speed up these operations. The interrupt handling is also basic at present, and vectored interrupts should probably be used.
 
 It's worth pointing out, for completeness, that since the FPGA is attached to a 32 bit wide by 4GB address space it would theoretically be possible to use this board to replace the 68030 with some other custom softcore processor running inside the FPGA, with the 68030 disabled or simply not present. Perhaps a more interesting opportunity would be to implement a custom 68020+ style co-processor.
+
+## Expansion Cards
+
+The following three cards have been created:
+
+1. [TestSRAM](ExpansionCards/TestSRAM/) - This is card is only really useful for the bringup. It has two 512KB SRAMs attached, along with pin headers attached to he expansion bus. It allows the system to be used without having a SIMM attached (and working).
+2. [Printer+Sticks](ExpansionCards/Printer%2BSticks/) - This is a fairly simple card featuring a [MC68230](http://www.ceipsa.com/datasheet/MC68230.pdf) and some latches. The board does not feature a DB25 connector, instead the printer must be attached through a "standard" 2x13 PC style adapter. The latches are attached to DB9 Atari-style joystick ports.
+3. [Video+Sound](ExpansionCards/Video%2BSound/) - The most interesting card by far; this a VGA card implemented with a Cyclone II FPGA and some fast 16 bit SRAM to hold the video framebuffer. Also featured is an I2S DAC.
+
+The Test+SRAM card (such as it is) has been shown to be error-free. The Printer+Joystick card has been exercised by attaching an old 9 pin dot matrix printer and printing text, though this was with the earlier MIDI020 68020 board. The Video+Sound board has been attached to MAXI030 and, though it has a few teaming troubles, it appears to work well. The sound portion of that card has not been explored at all however.
+
+More documentation on these cards will be forthcoming. For now, each expansion card directory contains the schematic and PCB files in KiCAD format, plus a PDF of the schematic, the BOM, and the rendered gerbers used to produce the cards.
 
 ## Machine-code monitor
 
