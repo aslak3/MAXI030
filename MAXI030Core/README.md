@@ -1,6 +1,6 @@
 # MAXI030Core
 
-The MAXI030 FPGA is responsible for essentially all the functionality that would have traditionally been included in glue logic, wether implemented with discrete logic ICs, GALs, or whatever. It also contains the logic for implementing various controllers and interfaces including:
+The MAXI030 FPGA is responsible for essentially all the functionality that would have traditionally been included in glue logic, wether implemented with discrete logic ICs, GALs, or whatever. It also contains the logic for implementing various controllers and interfaces, which would normally be handled by external peripheral ICs, including:
 
 * DRAM controller for the SIMM slots, including the address multiplexers
 * I2C master
@@ -9,11 +9,11 @@ The MAXI030 FPGA is responsible for essentially all the functionality that would
 * LED and buzzer output control
 * 5 pins of user-headers, generally used for debugging and board bringup
 
-Since the FPGA is attached to the full 32 bits of address bus, it is eventually intended to implement a bus-mastering DMA controller, though no progress has been made to this end.
+Since the FPGA is attached to the full 32 bits of the address and data busses, it is eventually intended to implement a bus-mastering DMA controller, though no progress has been made to this end.
 
 The design also includes a debug/bringup aid in the form of an SPI output-only interface.
 
-Currently only the top 8 bits of databus are used for communication between the processor and the FPGA. This is a result of this design being an evolution of earlier ones. Consequently services which require larger values to be programmed into them, like the timer, require multiple addresses. This will be eliminated when the full 32 bit databus is utilised.
+Currently only the top 8 bits of databus are used for communication between the processor and the FPGA. This is a result of this design being an evolution of an earlier one where this was a wiring restriction. Consequently services which require larger values to be programmed into them, like the timer, require multiple addresses. This will be eliminated when the full 32 bit databus is utilised.
 
 Note that for consistency all internal signals use positive logic. Inputs are converted to positive logic and outputs are converted to negative logic, if needed. The n_ prefix on signal names is used to indicate negative logic.
 
@@ -25,7 +25,7 @@ This is the main design file and includes the following entities:
 
 ### vector_mapper
 
-This entity deals with startup. Like most 68K based boards, a "trick" is used to map the ROM/flash into low memory only for the initial startup. After the initial Stack Pointer and Program Counter (2 long words, or 4 short words) have been read in, the system enters the normal runtime mode where address decoding will decode into the runtime address map, which is described below. This is achieved by counting (with a shift register) Address Strobes edges; after 4 rising edges the vectors have been read and the system is in the normal runtime mode, indicated by a high vector_fetched output.
+This entity deals with startup. Like most 68K based boards, a "trick" is used to map the ROM/flash into low memory only for the initial startup. After the initial Stack Pointer and Program Counter (2 longs, which needs 4 accesses to the 16 bit wide ROM) have been read in, the system enters the normal runtime mode where address decoding will utilise the runtime address map, which is described below. This is achieved by counting (with a shift register) Address Strobes edges; after 4 rising edges the vectors have been read and the system is in the normal runtime mode, indicated by a high vector_fetched output.
 
 ### addr_decode
 
@@ -132,28 +132,58 @@ The address decoder also deals with non "normal" accesses, namely:
 * FPU: The coprocessor uses standard bus cycles, but with a specific Function Code output, and address outputs.
 * Interrupt Acknowledgement: Similar to coprocessor access.
 
-In the vector_fetched state, the address decoder is also responsible for forcing the ROM to be selected, regardless of other inputs.
+When not in the vector_fetched state, the address decoder is also responsible for forcing the ROM to be selected, regardless of other inputs.
 
-Note the overlying state of a cycle, which is one of:
+Note the overlying state of a bus cycle, which is one of:
 
 * CYCLE_NULL: set when the address strobe is not asserted
 * CYCLE_BOOT_VECTORS: set for the first four address strobe cycles
 * CYCLE_FPU: set when the cycle is an FPU cycle
 * CYCLE_INT_ACK: set when the cycle is an interrupt acknowledgement
 * CYCLE_REG: set when an FPGA register is being accessed
-* CYCLE_NORMAL: set for all other accessses
+* CYCLE_NORMAL: set for all other accesses
 
 This is asserted combinationally in the external entity, and is fed to the address decoder to save it somme work.
 
 The output of the address decoder is an array, with one element per device. The address decoder will only assert one select at a time. Another key signal the address decoder is responsible for generating is the addr_width output, which sets the width of the device selected (byte, word or long). This in turn is used to generate the processor's /DSACK signals. For instance, the SIMM is a 32 bit (long) wide device, whilst the flash and expansion slots are 16 bits wide.
 
+The following is a table for the data width of the various devices on the board:
+
+<table>
+<tr>
+<th>Device</th>
+<th>Width</th>
+</tr><tr>
+<td>SIMM</td>
+<td>Long</td>
+</tr><tr>
+<td>ROM</td>
+<td>Word</td>
+</tr><tr>
+<td>Expansion slots</td>
+<td>Word</td>
+</tr><tr>
+<td>RTL8019AS (NIC)</td>
+<td>Word</td>
+</tr><tr>
+<td>IDE</td>
+<td>Word</td>
+</tr><tr>
+<td>QUART</td>
+<td>Byte</td>
+</tr><tr>
+<td>Core registers</td>
+<td>Byte</td>
+</tr>
+</table>
+
 ## dtack_generator
 
-This entity's job is to delay the /DSACK signal for the number of cycles required for that particular device. It is is fed a generic; the cycle count. A simple counter is used to assert a "wait complete" signal when the counter reaches the delay value. An instance of this entity is created for each device which needs waitstates. This is one of the few entities to have multiple instances.
+This entity's job is to delay the /DSACK signal for the number of cycles required for each particular device that needs this functionality. It is is fed a generic; the cycle count. A simple counter is used to assert a "wait complete" signal when the counter reaches the delay value. An instance of this entity is created for each device which needs waitstates. This is one of the few entities to have multiple instances.
 
 ## buzzer_generator
 
-A simple tone generator. The tone to be played is generated by incrementing a counter until it reaches the programmed value, upon which the buzzer output is toggled. The upper 8 bits of the 18 bit counter are tested, to scale the tone to audible values. Setting the programmed value to zero disables the counter, silencing the buzzer.
+A simple tone generator. The tone to be played is generated by incrementing a counter until it reaches the programmed value, upon which the buzzer output is toggled. The upper 8 bits of the 18 bit counter are compared, to scale the tone to audible values. Setting the programmed value to zero disables forces the buzzer output low, silencing the buzzer.
 
 ## maxi030_core
 
@@ -161,15 +191,15 @@ This is the top level entity. It is mostly concerned with instantiating the othe
 
 ### Port sizing
 
-The 68030 is a 32 bit processor with a byte addressable address bus. It supports both narrowed accesses and unaligned accesses. This is facilitated by the following signals:
+The 68030 is a 32 bit processor with a byte addressable address bus. It supports both narrowed (word and byte wide) accesses and unaligned accesses; for example a long read to a word wide port might, in the worst case, be spread across three bus cycles). This is facilitated by the following signals, from the point of view of the processor:
 
 * SIZ{0,1} outputs: This encodes the size of the request.
+* A0 and A1 outputs: This indicates the offset into the word or long.
 * /DSACK{0,1} inputs: This encodes the size of the port available at the selected address, in addition to indicating that the processor should generate an internal waitstate.
-* A0 and A1: This indicates the offset into the word or long.
 
-To complete the access, the processor may need to generate individual byte selects. For instance, a 32 bit device, like a 72 pin SIMM, needs byte select for each of the 4 bytes available. These outputs need to be generated based on the size of the request and the A0/A1 values for the access.
+To complete the access, the processor may need to generate individual byte selects. For instance, a 32 bit device, like a 72 pin SIMM, needs byte selects for each of the 4 bytes available. These outputs need to be generated based on the size of the request and the A0/A1 values for the access.
 
-Luckily the [MC68030 datasheet](https://www.nxp.com/docs/en/reference-manual/MC68030UM.pdf) includes both a schematic including 74-series logic gates, and some [ABEL](https://en.wikipedia.org/wiki/Advanced_Boolean_Expression_Language) code for a circuit that generates the needed signals for word and long-wide devices. This ABEL can has been translated into VHDL and included verbatim. Devices use these internal signals to form their final chip selects, by combining them with the device selects generated by the address decoder.
+Luckily the [MC68030 datasheet](https://www.nxp.com/docs/en/reference-manual/MC68030UM.pdf) includes both a schematic including 74-series logic gates, and some [ABEL](https://en.wikipedia.org/wiki/Advanced_Boolean_Expression_Language) code for a circuit that generates the needed signals for word and long-wide devices. This ABEL code has been translated into VHDL and included verbatim. Devices use these internal signals to form their final chip selects, by combining them with the device selects generated by the address decoder.
 
 ### Cycle type generator
 
@@ -177,15 +207,15 @@ This was covered in the address decoding section above.
 
 ### Read and Write generator
 
-This is a simple but critical part of the design which generates internal read and write signals, using the /DS data strobe and R/W signal. In this block the write line is also inhibited for ROM access, if the SYS_CONFIG register is configured to do this.
+This is a simple but critical part of the design which generates internal read and write signals, using the /DS data strobe and R/W signal. In this block the write line is also inhibited for ROM access, if the SYS_CONFIG register is configured to do this. This was useful on earlier boards which used simple EEPROMs but is less useful now that flashes, which can only be programmed by very specific command sequences, are used.
 
 ### Register Read and Write action
 
-This sequential process is responsible for managing the internal state based on accesses by the processor to FPGA-exposed registers. For instance, the board LED is controlled by the processor writing to the low bit of the LED registers address (generally 44000001). This action, and that of the other registers, is handled here.
+This sequential process is responsible for managing internal state based on accesses by the processor to FPGA-exposed registers. For instance, the board LED is controlled by the processor writing to the low bit of the LED register's address (generally 44000001). This action, and that of the other registers, is handled here.
 
 This block is also responsible for clearing trigger signals which are set for one cycle only after writing to a register. This is the basic mechanism for many parts of the overall design, such as the I2C data sender: writing to the I2C_WRITE_DATA register will both latch the data to be sent, and trigger its sending.
 
-Lastly read accesses are handled here. Most read accesses are "no ops", but some have side effects: for instance reading a PS2 scancode register will cause the read FIFO to expose the next data item, assuming there is one.
+Lastly read accesses are handled here. Most read accesses are "no ops", but some have side effects; for instance reading a PS/2 scancode register will cause the read FIFO to expose the next data item, assuming there is one.
 
 ### Presenting data on the databus
 
@@ -193,9 +223,9 @@ The main instance when data must be presented on the FPGA's databus is when FPGA
 
 ### Chip Selects and other outputs
 
-Here decoded internal selects are combined with the request sizing state to generate the external chip selects. For instance the lower ROM IC is enabled (set low) when the address decoder selects the ROM and the sizing logic indicates the low half of the word has been selected. The eight expansion card upper and lower selects are also generated here.
+Here decoded internal selects are combined with the request sizing signals to generate the external chip selects. For instance the lower ROM IC is enabled when the address decoder selects the ROM and the sizing logic indicates the low half of the a word wide port has been selected. The eight expansion card upper and lower selects are also generated here.
 
-This block also includes the SIMM /RAS and /CAS output generation, as well as the generation of negative logic for other outputs like /READ and /WRITE.
+This block also includes the SIMM /RAS and /CAS output generation, from the signals generated from the contoller, as well as the generation of negative logic for other outputs like /READ and /WRITE.
 
 The LED output is set here based on the status of bit 0 of the LED register, which is itself held in the led_state signal, which is set in the register write action process, described above.
 
@@ -205,7 +235,7 @@ The LED output is set here based on the status of bit 0 of the LED register, whi
 
 ### Interrupt routing
 
-At the current time interrupt routing is sequential logic, though this is probably incorrect. In any case the interrupt routing is very simplisitic: a priority encoder is used based on the interrupt inputs and the interrupt mask bits in the INT_PASS register. Currently 5 bits are defined, one for each of the possible interrupt sources. If a bit is 1, the interrupt can be enabled, if it is 0 it will be blocked.
+At the current time interrupt routing is sequential logic, though this is probably incorrect. In any case the interrupt routing is very simplistic: a priority encoder is used based on the interrupt inputs and the interrupt mask bits in the INT_PASS register. Currently 5 bits are defined, one for each of the possible interrupt sources. If a bit is 1, the interrupt can be enabled, if it is 0 it will be blocked. Each priority level maps to an /IPL level.
 
 ### Generation of misc MPU signals
 
@@ -213,15 +243,15 @@ Some simple combinational logic is used to generate the /CIIN (Cache Inhibit Inp
 
 ### SYS_CLEAR signal generation
 
-As an extra precaution for a clean processor startup, the board /RESET signal is held off being asserted at power on by a counter. This keeps the processor paused while the FPGA configures itself, which is accomplished with a pull-down resistor), and for a short time afterwards. In theory it is not needed, but is present out of paranoia. Note that system reset (except the FPGA itself) is under FPGA control. This could allow the implementation of a watchdog timer, and similar functionality, though nothing has so far been written to do this.
+As an extra precaution for a clean processor startup, the processor (and other devices) /RESET signal is held off being cleared at power on by a counter. This keeps the processor paused while the FPGA configures itself - which is accomplished with a pull-up resistor attached to the input of an open-collector NAND gate, which itself has a pull-up resistor on its output that's attached to the 68030's /RESET input - and for a short time afterwards, using a counter. In theory the counter is not needed, but is present out of paranoia. Note that system reset (but not the FPGA itself, which is only reset as a result of being reconfigured) is under FPGA control. This could allow the implementation of a watchdog timer, and similar functionality, though nothing has so far been written to do this.
 
 ## timer.vhd
 
-Though the boards QUART contains two timers, the Linux port required a standalone timer, so one was added to MAXI030Core.
+Though the board's QUART contains two timers, the Linux port required a standalone timer, so one was added to MAXI030Core.
 
-The timer has a 24 bit countdown register starting value (exposed on 3 byte wide FPGA-addressable registers) and a control register.
+The timer has a 24 bit countdown register (currently exposed on 3 byte wide FPGA-addressable registers) and a control register.
 
-On a trigger, which is set for one cycle when the control register is written to, the current counter value is copied from the starting value and the counter is enabled. At every cycle, if the counter is enabled it counts down. When it reaches 0 the counter rollover signal is set to 1, but the counter keeps counting down. Thus no matter how slow the processor is at acknowledging the rollover interrupt, the frequency of the interrupt will match the counter start value.
+On a trigger, which is set for one cycle when the control register is written to, the current counter value is updated from the starting value and the counter is enabled. At every cycle, if the counter is enabled it counts down. When it reaches 0 the counter rollover output signal is set to 1, but the counter will continue counting down, after being reset to the starting value. Thus no matter how slow the processor is at acknowledging the rollover interrupt, the frequency of the interrupt will match the counter start value.
 
 There are two bits used on the exposed TIMER_CONTROL register:
 
@@ -232,24 +262,24 @@ Clearing the interrupt is achieved by writing a 1 to bit 0, which will restart (
 
 ## i2c.vhd
 
-The I2C controller used is a direct copy of a project I have published as a [standalone piece of programmable logic](https://github.com/aslak3/i2c-controller). It's interface to the outside world is through the I2C registers. The four registers are used as follows:
+The I2C controller used is a direct copy of a project I have published as a [standalone piece of programmable logic](https://github.com/aslak3/i2c-controller). It's interface to the outside world is through the I2C registers. The four byte wide registers are used as follows:
 
 * I2C_ADDRESS : Sets the slave address. The MSB (and not the LSB) is used to set the read (1) or write mode. This will trigger a transfer, sending the address.
-* I2C_READ_DATA : This will (somewhat unobviously) trigger a transfer. Poll on bit 0 of I2C_CONTROL until it is 0 to know when the data can actually be read.
+* I2C_READ_DATA : This will (somewhat unobviously) trigger a transfer. Poll on bit 0 of I2C_CONTROL until it is 0 to know when the data can actually be read, which will trigger the next transfer at the same time.
 * I2C_WRITE_DATA : This will trigger a transfer.
 * I2C_CONTROL : This is a read and write register. In read (AKA I2C_STATUS) bit 0 is the busy flag, and bit 1 is the ack_error flag. In write bit 0 indicates that this is the last byte to be transferred.
 
 ## ps2_controller.vhd
 
-This is a bi-directional PS/2 interface. This will, eventually, be pushed up into a standalone repository like the I2C controller was, and will be documented fully there.
+This is a bi-directional PS/2 interface. As this controller could be useful in other people's projects, this will, eventually, be pushed up into a standalone repository like the I2C controller was, and will be documented fully there.
 
 Note that this FPGA makes use of one Altera "MegaFunction": A FIFO in front of the PS/2 output data. This was added because of problems with missing data bytes from the port when running Linux, presumably because under some conditions Linux will disable interrupts, causing lost data if it is not buffered in hardware.
 
 ## simm_controller.vhd
 
-There are two entities which form a fairly dumb DRAM controller, which is used by the SIMM slots (well only one slot currently). A simple state machine is used. Refresh timing is mostly approximated. Also, the controller does not support EDO mode or rows being held open, or anything else clever that could make it more efficient.
+There are two entities which form a fairly dumb DRAM controller, which is used by the SIMM slots (well only one slot currently). A simple state machine is used. Refresh timing is perhaps not completely accurate. Also, the controller does not support EDO mode or rows being held open which would make it more efficient.
 
-However one nice aspect of the design is that because the FPGA is exposed to the entire processor address bus, *and* it is directly attached to the address pins on the SIMM, complete flexibility of supported memory sizes is possible. I currently have access to an 8 MByte and a 32 MByte SIMM, and both have been tested and are working.
+However one nice aspect of the design is that because the FPGA is exposed to the entire processor address bus, *and* it is directly attached to the address pins on the SIMM, complete flexibility of supported memory sizes is possible. I currently have access to an 8 MByte and a 32 MByte SIMM, and both have been tested and are working. Note that the mapping of address bits, and thus the size of the supported module, is hardcoded in this file.
 
 This is a particularly interesting area, from the point of view of improvements to the performance of the MAXI030 board: besides the missing EDO mode, it would be great to make use of the MC68030 burst mode to fill the cache with back to back transfers.
 

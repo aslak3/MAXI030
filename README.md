@@ -65,7 +65,7 @@ The following three cards have been created:
 2. [Printer+Sticks](ExpansionCards/Printer%2BSticks/) - This is a fairly simple card featuring a [MC68230](http://www.ceipsa.com/datasheet/MC68230.pdf) and some latches. The board does not feature a DB25 connector, instead the printer must be attached through a "standard" 2x13 PC style adapter. The latches are attached to DB9 Atari-style joystick ports.
 3. [Video+Sound](ExpansionCards/Video%2BSound/) - The most interesting card by far; this a VGA card implemented with a Cyclone II FPGA and some fast 16 bit SRAM to hold the video framebuffer. Also featured is an I2S DAC.
 
-The Test+SRAM card (such as it is) has been shown to be error-free. The Printer+Joystick card has been exercised by attaching an old 9 pin dot matrix printer and printing text, though this was with the earlier MIDI020 68020 board. The Video+Sound board has been attached to MAXI030 and, though it has a few teaming troubles, it appears to work well. The sound portion of that card has not been explored at all however.
+The TestxSRAM card (such as it is) has been shown to be error-free. The Printer+Joystick card has been exercised by attaching an old 9 pin dot matrix printer and printing text, though this was with the earlier MIDI020 68020 board. The Video+Sound board has been attached to MAXI030 and, though it has a few teaming troubles, it appears to work well. The sound portion of that card has not been explored at all however.
 
 More documentation on these cards will be forthcoming. For now, each expansion card directory contains the schematic and PCB files in KiCAD format, plus a PDF of the schematic, the BOM, and the rendered gerbers used to produce the cards.
 
