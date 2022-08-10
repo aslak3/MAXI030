@@ -93,7 +93,7 @@ A Linux port has been started and seems to work quite well. The following hardwa
 * PS/2 - the driver implemented supports both ports
 * Framebuffer - a very slow and Work in Progress driver for the video card I've built
 
-With a 40MHz can installed, a modern Linux kernel will boot in about 5 minutes. But see the Gotchas section below.
+With a 32MHz can installed, a modern Linux kernel will boot in about 2.5 minutes. But see the Gotchas section below.
 
 A [fork of the Linux kernel](https://www.github.com/aslak3/linux.git) from early 2022 has work done at the head of the lm/maxi030 branch with the changes I've made.
 
@@ -121,7 +121,7 @@ The general process to get Linux running on MAXI030 is as follows, assuming the 
 
 ## Issues
 
-The big issue I'm currently working on is board speed. With all the functionality enabled in the FPGA design, I'm currently not able to run the board at the maximum speed of the 68030 I have installed, 40MHz. In particular adding the FIFOs on the PS/2 controller results in an inoperable system at 40MHz. The FIFOs seem to be required when running in Linux since the kernel disables interrupts in some situations, which results in data loss.
+The big issue I'm currently working on is board speed. With all the functionality enabled in the FPGA design, I'm currently not able to run the board at the maximum speed of the 68030 I have installed, 40MHz. Insteaed I must settle for running the board at 32MHz. In particular adding the FIFOs on the PS/2 controller results in an inoperable system at 40MHz. The FIFOs seem to be required when running in Linux since the kernel disables interrupts in some situations, which results in data loss.
 
 The board also has a few very minor problems:
 
