@@ -25,7 +25,7 @@
 # Notes:
 #
 # 1) The default values for assignments are stored in the file:
-#		maxi030_core_assignment_defaults.qdf
+#		MAXI030Core_assignment_defaults.qdf
 #    If this file doesn't exist, see file:
 #		assignment_defaults.qdf
 #
@@ -38,7 +38,7 @@
 
 set_global_assignment -name FAMILY FLEX10KE
 set_global_assignment -name DEVICE "EPF10K130EQC240-1"
-set_global_assignment -name TOP_LEVEL_ENTITY maxi030_core
+set_global_assignment -name TOP_LEVEL_ENTITY MAXI030Core
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "9.0 SP2"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "10:04:40  JUNE 16, 2021"
 set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
@@ -230,14 +230,5 @@ set_global_assignment -name ALLOW_POWER_UP_DONT_CARE OFF
 set_global_assignment -name REMOVE_REDUNDANT_LOGIC_CELLS OFF
 set_global_assignment -name ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION OFF
 set_global_assignment -name HDL_MESSAGE_LEVEL LEVEL3
-set_global_assignment -name MISC_FILE maxi030_core.dpf
-set_global_assignment -name VHDL_FILE ps2_fifo.vhd
-set_global_assignment -name VHDL_FILE spi.vhd
-set_global_assignment -name VHDL_FILE i2c.vhd
-set_global_assignment -name VHDL_FILE maxi030_core.vhd
-set_global_assignment -name VHDL_FILE ps2_controller.vhd
-set_global_assignment -name VHDL_FILE simm_controller.vhd
-set_global_assignment -name VHDL_FILE timer.vhd
-set_global_assignment -name QIP_FILE ps2_fifo.qip
-set_global_assignment -name VHDL_FILE uart.vhd
-set_global_assignment -name MISC_FILE "C:/MAXI030Core/maxi030_core.dpf"
+set_global_assignment -name VERILOG_FILE led_flasher.v
+set_global_assignment -name VERILOG_FILE MAXI030Core.v
