@@ -32,9 +32,12 @@
 `define DEVICE_ETH_POS                 7
 `define DEVICE_ROM_POS                 8
 // 8 bit port
-`define DEVICE_FPGA_POS                9
+`define DEVICE_REGISTER8_POS           9
 `define DEVICE_QUART_POS               10
-`define DEVICE_SELECTED_MAXPOS         11
+// 32 bit port
+`define DEVICE_REGISTER32_POS          11
+
+`define DEVICE_SELECTED_MAXPOS         12
 
 `define DEVICE_NULL                    {`DEVICE_SELECTED_MAXPOS{1'b0}}
 // 32bit port
@@ -44,19 +47,28 @@
 `define DEVICE_SLOT1                   (1 << `DEVICE_SLOT1_POS)
 `define DEVICE_SLOT2                   (1 << `DEVICE_SLOT2_POS)
 `define DEVICE_SLOT3                   (1 << `DEVICE_SLOT3_POS)
-`define DEVICE_SLOT3                   (1 << `DEVICE_SLOT3_POS)
 `define DEVICE_IDE1                    (1 << `DEVICE_IDE1_POS)
 `define DEVICE_IDE3                    (1 << `DEVICE_IDE3_POS)
 `define DEVICE_ETH                     (1 << `DEVICE_ETH_POS)
 `define DEVICE_ROM                     (1 << `DEVICE_ROM_POS)
 // 8 bit port
+`define DEVICE_REGISTER8               (1 << `DEVICE_REGISTER8_POS)
 `define DEVICE_QUART                   (1 << `DEVICE_QUART_POS)
-`define DEVICE_FPGA                    (1 << `DEVICE_FPGA_POS)
+// 32 bit port
+`define DEVICE_REGISTER32              (1 << `DEVICE_REGISTER32_POS)
 
-// REGISTERS
+// REGISTERS 8 bit
 //
-`define REGISTER_LED_POS                0
-`define REGISTER_SELECTED_MAXPOS        1
+`define REGISTER8_LED_POS               0
+`define REGISTER8_SELECTED_MAXPOS       1
 
-`define REGISTER_NULL                   {`REGISTER_SELECTED_MAXPOS{1'b0}}
-`define REGISTER_LED                    (1 << `REGISTER_LED_POS)
+`define REGISTER8_NULL                  {`REGISTER8_SELECTED_MAXPOS{1'b0}}
+`define REGISTER8_LED                   (1 << `REGISTER8_LED_POS)
+
+// REGISTERS 832bit
+//
+`define REGISTER32_TEST_POS             0
+`define REGISTER32_SELECTED_MAXPOS      1
+
+`define REGISTER32_NULL                  {`REGISTER32_SELECTED_MAXPOS{1'b0}}
+`define REGISTER32_TEST                  (1 << `REGISTER32_TEST_POS)

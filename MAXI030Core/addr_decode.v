@@ -62,8 +62,14 @@ module device_decode
                 end else if (addr_upper[7:6] == 2'b10) begin
                     port_width = `PORT_WIDTH_BYTE;
                     case (addr_upper[5:0])
-                        6'b000000:          device_selected = `DEVICE_FPGA; // 0x80
+                        6'b000000:          device_selected = `DEVICE_REGISTER8; // 0x80
                         6'b000001:          device_selected = `DEVICE_QUART; // 0x81
+                        default:            device_selected = `DEVICE_NULL;
+                    endcase
+                end else if (addr_upper[7:6] == 2'b11) begin
+                    port_width = `PORT_WIDTH_LONG;
+                    case (addr_upper[5:0])
+                        6'b000000:          device_selected = `DEVICE_REGISTER32; // 0xc0
                         default:            device_selected = `DEVICE_NULL;
                     endcase
                 end else begin
@@ -78,22 +84,42 @@ module device_decode
     end
 endmodule
 
-module register_decode
+module register8_decode
     (
-        input       device_fpga_selected,
+        input       device_register8_selected,
         input       [7:0] addr_lower,
 
-        output reg  [`REGISTER_SELECTED_MAXPOS-1:0] register_selected
+        output reg  [`REGISTER8_SELECTED_MAXPOS-1:0] register8_selected
     );
 
     always @ (*) begin
-        if (device_fpga_selected) begin
+        if (device_register8_selected) begin
             case (addr_lower)
-                8'h00:      register_selected = `REGISTER_LED;
-                default:    register_selected = `REGISTER_NULL;
+                8'h00:      register8_selected = `REGISTER8_LED;
+                default:    register8_selected = `REGISTER8_NULL;
             endcase
         end else begin
-            register_selected = `REGISTER_NULL;
+            register8_selected = `REGISTER8_NULL;
+        end
+    end
+endmodule
+
+module register32_decode
+    (
+        input       device_register32_selected,
+        input       [7:0] addr_lower,
+
+        output reg  [`REGISTER32_SELECTED_MAXPOS-1:0] register32_selected
+    );
+
+    always @ (*) begin
+        if (device_register32_selected) begin
+            case (addr_lower)
+                8'h00:      register32_selected = `REGISTER32_TEST;
+                default:    register32_selected = `REGISTER32_NULL;
+            endcase
+        end else begin
+            register32_selected = `REGISTER32_NULL;
         end
     end
 endmodule

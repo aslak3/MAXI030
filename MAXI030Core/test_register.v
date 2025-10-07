@@ -1,23 +1,23 @@
-module led_register
+module test_register
     (
         input reset,
         input clock,
 
         input write,
         input cs,
-        input [7:0] data_in,
+        input [31:0] data_in,
         
-        output reg led
-);
+        output reg [31:0] data_out
+    );
+
+    reg test_data[31:0];
 
     always @ (posedge clock) begin
         if (reset) begin
-            led <= 1'b0;
         end else begin
             if (cs && write) begin
-                led <= data_in[0];
+                data_out <= data_in;
             end
         end
     end
-
 endmodule

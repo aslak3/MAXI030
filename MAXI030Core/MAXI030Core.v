@@ -252,14 +252,36 @@ module MAXI030Core
 	assign n_ide_read = ~read;
 	assign n_ide_write = ~write;
 
-	wire [`REGISTER_SELECTED_MAXPOS-1:0] register_selected;
-	register_decode register_decode
+	wire [`REGISTER8_SELECTED_MAXPOS-1:0] register8_selected;
+	register8_decode register8_decode
 	(
-		.device_fpga_selected(device_selected[`DEVICE_FPGA_POS]),
+		.device_register8_selected(device_selected[`DEVICE_REGISTER8_POS]),
 		.addr_lower(addr[7:0]),
 
-		.register_selected(register_selected)
+		.register8_selected(register8_selected)
 	);
+
+	wire [`REGISTER32_SELECTED_MAXPOS-1:0] register32_selected;
+	register32_decode register32_decode
+	(
+		.device_register32_selected(device_selected[`DEVICE_REGISTER32_POS]),
+		.addr_lower(addr[7:0]),
+
+		.register32_selected(register32_selected)
+	);
+
+	wire [7:0] data8 = 
+		register8_selected[`REGISTER8_LED_POS] ? { 7'b0000000, led } :
+		8'h00;
+
+	wire [31:0] data32 =
+		register32_selected[`REGISTER32_TEST_POS] ? test_data_out :
+		32'h00000000;
+
+	assign data =
+		read & device_selected[`DEVICE_REGISTER8_POS] ? { data8, 24'h000000 } :
+		read & device_selected[`DEVICE_REGISTER32_POS] ? data32 :
+		32'hzzzzzzzz;
 
 	led_register led_register
     (
@@ -267,9 +289,23 @@ module MAXI030Core
         .clock(clock),
 
         .write(write),
-        .cs(register_selected[`REGISTER_LED_POS]),
+        .cs(register8_selected[`REGISTER8_LED_POS]),
 		.data_in(data[31:24]),
-        .led(led)
+
+		.led(led)
+    );
+
+	wire [31:0] test_data_out;
+	test_register test_register
+    (
+        .reset(reset),
+        .clock(clock),
+
+        .write(write),
+        .cs(register32_selected[`REGISTER32_TEST_POS]),
+		.data_in(data),
+
+		.data_out(test_data_out)
     );
 
 	sys_clear_generator sys_clear_generator
@@ -278,6 +314,6 @@ module MAXI030Core
 
 		.sys_clear(sys_clear)
 	);
-
-	assign user[4:0] = { 3'b000, device_selected[`DEVICE_FPGA_POS], device_selected[`DEVICE_ROM_POS]};
+	
+	assign user[4:0] = { 4'b00000, register8_selected[`REGISTER8_LED_POS] };
 endmodule
