@@ -187,11 +187,8 @@ module MAXI030Core
 
 	// DSACK
 	assign n_dsack =    function_selected[`FUNCTION_FPU_POS] ? 2'bzz :
-						(quart_waitstate & device_selected[`DEVICE_QUART_POS]) ? 2'b11 :
-						port_width == `PORT_WIDTH_LONG ? 2'b00 :
-						port_width == `PORT_WIDTH_WORD ? 2'b01 :
-						port_width == `PORT_WIDTH_BYTE ? 2'b10 :
-						2'b11;
+						quart_waitstate ? 2'b11 :
+						port_width;
 
 	// Misc
 	assign p_reset = reset;
@@ -219,9 +216,18 @@ module MAXI030Core
 	// Cache inhibit: cache enable only on the SIMM and flash
 	assign n_ciin = (device_selected[`DEVICE_SIMM_POS] | device_selected[`DEVICE_ROM_POS]);
 
+	// Bus error occurs either when no device is selected, or a register bank is selected but no
+	// registers
+	assign n_berr = function_selected[`FUNCTION_NORMAL_POS] & (
+		(device_selected == `DEVICE_NULL) |
+		// TODO fix bootloader or implement buzzer, etc
+		// (device_selected[`DEVICE_REGISTER8_POS] & register8_selected == `REGISTER8_NULL) |
+		(device_selected[`DEVICE_REGISTER16_POS] & register16_selected == `REGISTER16_NULL) |
+		(device_selected[`DEVICE_REGISTER32_POS] & register32_selected == `REGISTER32_NULL)
+		) ? 1'b0 : 1'b1;
+
 	// Placeholders
 	// CPU
-	assign n_berr = 1'b1;
 	assign n_halt = 1'b1;
 	assign n_sterm = 1'b1;
 	assign n_ipl = 3'b111;
@@ -261,6 +267,15 @@ module MAXI030Core
 		.register8_selected(register8_selected)
 	);
 
+	wire [`REGISTER16_SELECTED_MAXPOS-1:0] register16_selected;
+	register16_decode register16_decode
+	(
+		.device_register16_selected(device_selected[`DEVICE_REGISTER16_POS]),
+		.addr_lower(addr[7:0]),
+
+		.register16_selected(register16_selected)
+	);
+
 	wire [`REGISTER32_SELECTED_MAXPOS-1:0] register32_selected;
 	register32_decode register32_decode
 	(
@@ -270,16 +285,21 @@ module MAXI030Core
 		.register32_selected(register32_selected)
 	);
 
-	wire [7:0] data8 = 
+	wire [7:0] data8 =
 		register8_selected[`REGISTER8_LED_POS] ? { 7'b0000000, led } :
 		8'h00;
 
+	wire [15:0] data16 =
+		register16_selected[`REGISTER16_TEST_POS] ? test_data16_out :
+		16'h0000;
+
 	wire [31:0] data32 =
-		register32_selected[`REGISTER32_TEST_POS] ? test_data_out :
+		register32_selected[`REGISTER32_TEST_POS] ? test_data32_out :
 		32'h00000000;
 
 	assign data =
 		read & device_selected[`DEVICE_REGISTER8_POS] ? { data8, 24'h000000 } :
+		read & device_selected[`DEVICE_REGISTER16_POS] ? { data16, 16'h0000 } :
 		read & device_selected[`DEVICE_REGISTER32_POS] ? data32 :
 		32'hzzzzzzzz;
 
@@ -295,8 +315,21 @@ module MAXI030Core
 		.led(led)
     );
 
-	wire [31:0] test_data_out;
-	test_register test_register
+	wire [15:0] test_data16_out;
+	test_register16 test_register16
+    (
+        .reset(reset),
+        .clock(clock),
+
+        .write(write),
+        .cs(register16_selected[`REGISTER16_TEST_POS]),
+		.data_in(data),
+
+		.data_out(test_data16_out)
+    );
+
+	wire [31:0] test_data32_out;
+	test_register32 test_register32
     (
         .reset(reset),
         .clock(clock),
@@ -305,7 +338,7 @@ module MAXI030Core
         .cs(register32_selected[`REGISTER32_TEST_POS]),
 		.data_in(data),
 
-		.data_out(test_data_out)
+		.data_out(test_data32_out)
     );
 
 	sys_clear_generator sys_clear_generator
@@ -314,6 +347,6 @@ module MAXI030Core
 
 		.sys_clear(sys_clear)
 	);
-	
+
 	assign user[4:0] = { 4'b00000, register8_selected[`REGISTER8_LED_POS] };
 endmodule

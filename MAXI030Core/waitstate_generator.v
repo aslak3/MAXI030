@@ -18,5 +18,5 @@ module waitstate_generator #(
         end
     end
 
-    assign waitstate = counter == DELAY ? 1'b0 : 1'b1;
+    assign waitstate = counter == DELAY ? 1'b0 : cs;
 endmodule

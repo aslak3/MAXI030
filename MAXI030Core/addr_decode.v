@@ -47,29 +47,31 @@ module device_decode
                     port_width = `PORT_WIDTH_WORD;
                     device_selected = `DEVICE_SLOT0;
                 end else if (addr_upper[7:6] == 2'b01) begin
-                    port_width = `PORT_WIDTH_WORD;
+                    port_width = `PORT_WIDTH_BYTE;
                     case (addr_upper[5:0])
-                        6'b000000:          device_selected = `DEVICE_SLOT0; // 0x40
-                        6'b000001:          device_selected = `DEVICE_SLOT1; // 0x41
-                        6'b000010:          device_selected = `DEVICE_SLOT2; // 0x42
-                        6'b000011:          device_selected = `DEVICE_SLOT3; // 0x43
-                        6'b000100:          device_selected = `DEVICE_IDE1;  // 0x44
-                        6'b000101:          device_selected = `DEVICE_IDE3;  // 0x45
-                        6'b000110:          device_selected = `DEVICE_ETH;   // 0x46
-                        6'b111111:          device_selected = `DEVICE_ROM;   // 0x7f
+                        6'b000000:          device_selected = `DEVICE_REGISTER8; // 0x40
+                        6'b010000:          device_selected = `DEVICE_QUART; // 0x50
                         default:            device_selected = `DEVICE_NULL;
                     endcase
                 end else if (addr_upper[7:6] == 2'b10) begin
-                    port_width = `PORT_WIDTH_BYTE;
+                    port_width = `PORT_WIDTH_WORD;
                     case (addr_upper[5:0])
-                        6'b000000:          device_selected = `DEVICE_REGISTER8; // 0x80
-                        6'b000001:          device_selected = `DEVICE_QUART; // 0x81
+                        6'b000000:          device_selected = `DEVICE_REGISTER16; // 0x80                    
+                        6'b010000:          device_selected = `DEVICE_SLOT0; // 0x90
+                        6'b010001:          device_selected = `DEVICE_SLOT1; // 0x91
+                        6'b010010:          device_selected = `DEVICE_SLOT2; // 0x92
+                        6'b010011:          device_selected = `DEVICE_SLOT3; // 0x93
+                        6'b010100:          device_selected = `DEVICE_IDE1;  // 0x94
+                        6'b010101:          device_selected = `DEVICE_IDE3;  // 0x95
+                        6'b010110:          device_selected = `DEVICE_ETH;   // 0x96
+                        6'b111111:          device_selected = `DEVICE_ROM;   // 0xbf
                         default:            device_selected = `DEVICE_NULL;
                     endcase
                 end else if (addr_upper[7:6] == 2'b11) begin
                     port_width = `PORT_WIDTH_LONG;
                     case (addr_upper[5:0])
                         6'b000000:          device_selected = `DEVICE_REGISTER32; // 0xc0
+                        6'b010000:          device_selected = `DEVICE_SIMM; // 0xd0
                         default:            device_selected = `DEVICE_NULL;
                     endcase
                 end else begin
@@ -100,6 +102,26 @@ module register8_decode
             endcase
         end else begin
             register8_selected = `REGISTER8_NULL;
+        end
+    end
+endmodule
+
+module register16_decode
+    (
+        input       device_register16_selected,
+        input       [7:0] addr_lower,
+
+        output reg  [`REGISTER16_SELECTED_MAXPOS-1:0] register16_selected
+    );
+
+    always @ (*) begin
+        if (device_register16_selected) begin
+            case (addr_lower)
+                8'h00:      register16_selected = `REGISTER16_TEST;
+                default:    register16_selected = `REGISTER16_NULL;
+            endcase
+        end else begin
+            register16_selected = `REGISTER16_NULL;
         end
     end
 endmodule
