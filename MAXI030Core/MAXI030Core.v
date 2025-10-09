@@ -238,7 +238,6 @@ module MAXI030Core
 		.clock(clock),
 
 		.cs(device_selected[`DEVICE_SIMM_POS]),
-		.as(as),
 		.ds(ds),
 		.rn_w(rn_w),
 		.bank_addr(addr[10 + 11 + 3]),

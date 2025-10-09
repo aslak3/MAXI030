@@ -3,7 +3,6 @@ module simm_controller_tb;
     reg reset;
     reg clock;
     reg cs;
-    reg as;
     reg ds;
     reg rn_w;
     reg bank_addr;
@@ -21,7 +20,6 @@ module simm_controller_tb;
         .reset(reset),
         .clock(clock),
         .cs(cs),
-        .as(as),
         .ds(ds),
         .rn_w(rn_w),
         .bank_addr(bank_addr),
@@ -54,23 +52,23 @@ module simm_controller_tb;
         reset = 0;
 
         // Idle state: no signals active
-        cs = 0; as = 0; ds = 0; rn_w = 0; bank_addr = 0; byte_selects = 4'b0000;
+        cs = 0; ds = 0; rn_w = 0; bank_addr = 0; byte_selects = 4'b0000;
         #3000;
 
         // Busy state: memory read
-        cs = 1; as = 1; ds = 1; rn_w = 0; bank_addr = 0; byte_selects = 4'b1010;
+        cs = 1; ds = 1; rn_w = 0; bank_addr = 0; byte_selects = 4'b1010;
         wait (!waitstate);
-        cs = 1; as = 0; ds = 0; rn_w = 0; bank_addr = 0; byte_selects = 4'b1010;
+        cs = 1; ds = 0; rn_w = 0; bank_addr = 0; byte_selects = 4'b1010;
         #50;
 
         // Busy state: memory write
-        cs = 1; as = 1; ds = 1; rn_w = 1; bank_addr = 1; byte_selects = 4'b1111;
+        cs = 1; ds = 1; rn_w = 1; bank_addr = 1; byte_selects = 4'b1111;
         wait (!waitstate);
-        cs = 1; as = 0; ds = 1; rn_w = 1; bank_addr = 1; byte_selects = 4'b1111;
+        cs = 1; ds = 1; rn_w = 1; bank_addr = 1; byte_selects = 4'b1111;
         #50;
 
         // Refresh sequence
-        cs = 0; as = 0; ds = 0; rn_w = 1; bank_addr = 1; byte_selects = 4'b0000;
+        cs = 0; ds = 0; rn_w = 1; bank_addr = 1; byte_selects = 4'b0000;
         #1000;
 
         // End simulation

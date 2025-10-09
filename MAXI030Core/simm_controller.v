@@ -6,7 +6,6 @@ module simm_controller
         input clock,
 
         input cs,
-        input as,
         input ds,
         input rn_w,
         input bank_addr,
@@ -60,7 +59,7 @@ module simm_controller
 					if (needs_refresh) begin
 						needs_refresh <= 1'b0;
 						state <= REFRESH1;
-					end else if (cs && ds && as) begin
+					end else if (cs && ds) begin
 						write <= ~rn_w;
 						if (bank_addr) begin
 							ras <= 4'b0101;
@@ -88,7 +87,7 @@ module simm_controller
 					end
 
 					waitstate <= 1'b0;
-					if (as) begin
+					if (cs) begin
 						state <= MEMRW2;
 					end else begin
 						state <= IDLE;
