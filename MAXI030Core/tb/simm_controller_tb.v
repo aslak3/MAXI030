@@ -3,12 +3,14 @@ module simm_controller_tb;
     reg reset;
     reg clock;
     reg cs;
-    reg read;
-    reg write;
+    reg as;
+    reg ds;
+    reg rn_w;
     reg bank_addr;
     reg [3:0] byte_selects;
 
     // Outputs
+    wire write;
     wire [3:0] ras;
     wire [3:0] cas;
     wire waitstate;
@@ -19,11 +21,13 @@ module simm_controller_tb;
         .reset(reset),
         .clock(clock),
         .cs(cs),
-        .read(read),
-        .write(write),
+        .as(as),
+        .ds(ds),
+        .rn_w(rn_w),
         .bank_addr(bank_addr),
         .byte_selects(byte_selects),
 
+        .write(write),
         .ras(ras),
         .cas(cas),
         .waitstate(waitstate),
@@ -50,24 +54,23 @@ module simm_controller_tb;
         reset = 0;
 
         // Idle state: no signals active
-        cs = 0; read = 0; write = 0; bank_addr = 0; byte_selects = 4'b0000;
+        cs = 0; as = 0; ds = 0; rn_w = 0; bank_addr = 0; byte_selects = 4'b0000;
         #3000;
 
         // Busy state: memory read
-        cs = 1; read = 1; write = 0; bank_addr = 0; byte_selects = 4'b0011;
+        cs = 1; as = 1; ds = 1; rn_w = 0; bank_addr = 0; byte_selects = 4'b1010;
         wait (!waitstate);
-        cs = 0; read = 0; write = 0; bank_addr = 0; byte_selects = 4'b0000;
+        cs = 1; as = 0; ds = 0; rn_w = 0; bank_addr = 0; byte_selects = 4'b1010;
         #50;
 
         // Busy state: memory write
-        cs = 1; read = 1; write = 0; bank_addr = 0; byte_selects = 4'b0011;
+        cs = 1; as = 1; ds = 1; rn_w = 1; bank_addr = 1; byte_selects = 4'b1111;
         wait (!waitstate);
-
+        cs = 1; as = 0; ds = 1; rn_w = 1; bank_addr = 1; byte_selects = 4'b1111;
         #50;
-        cs = 1; read = 0; write = 1; bank_addr = 0; byte_selects = 4'b0011;
 
         // Refresh sequence
-        cs = 0; read = 0; write = 0; bank_addr = 0; byte_selects = 4'b0000;
+        cs = 0; as = 0; ds = 0; rn_w = 1; bank_addr = 1; byte_selects = 4'b0000;
         #1000;
 
         // End simulation
@@ -76,7 +79,7 @@ module simm_controller_tb;
 
     // Monitor outputs
     initial begin
-        $monitor("Time %0t: state: %d, ras=%b, cas=%b, waitstate=%b, mux_select=%b",
-            $time, dut.state, ras, cas, waitstate, mux_select);
+        $monitor("Time %0t: state: %d, write=%b, ras=%b, cas=%b, waitstate=%b, mux_select=%b",
+            $time, dut.state, write, ras, cas, waitstate, mux_select);
     end
 endmodule

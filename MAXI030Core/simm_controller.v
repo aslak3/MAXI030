@@ -6,11 +6,13 @@ module simm_controller
         input clock,
 
         input cs,
-        input read,
-        input write,
+        input as,
+        input ds,
+        input rn_w,
         input bank_addr,
         input [3:0] byte_selects,
 
+        output reg write,
         output reg [3:0] ras,
         output reg [3:0] cas,
         output reg waitstate,
@@ -33,6 +35,7 @@ module simm_controller
 	always @ (posedge clock) begin
 		if (reset) begin
 			refresh_count <= 8'd0;
+			write <= 1'b0;
 			mux_select <= 1'b1;
 			ras <= 4'b0000;
 			cas <= 4'b0000;
@@ -48,6 +51,7 @@ module simm_controller
 
 			case (state)
 				IDLE: begin
+					write <= 1'b0;
 					mux_select <= 1'b0;
 					ras <= 4'b0000;
 					cas <= 4'b0000;
@@ -56,7 +60,8 @@ module simm_controller
 					if (needs_refresh) begin
 						needs_refresh <= 1'b0;
 						state <= REFRESH1;
-					end else if (cs && (read || write)) begin
+					end else if (cs && ds && as) begin
+						write <= ~rn_w;
 						if (bank_addr) begin
 							ras <= 4'b0101;
 						end else begin
@@ -74,7 +79,7 @@ module simm_controller
 				end
 
 				MEMRW2: begin
-					if (write) begin
+					if (rn_w == 1'b0) begin
 						// Writing? Select only needed bytes
 						cas <= byte_selects;
 					end else begin
@@ -83,7 +88,7 @@ module simm_controller
 					end
 
 					waitstate <= 1'b0;
-					if (cs) begin
+					if (as) begin
 						state <= MEMRW2;
 					end else begin
 						state <= IDLE;
@@ -116,7 +121,6 @@ endmodule
 
 module simm_mux
 	(
-        // High for column (low order), low for row (high order)
 		input mux_select,
 		input [31:0] addr_in,
 

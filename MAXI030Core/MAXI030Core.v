@@ -231,17 +231,20 @@ module MAXI030Core
 	wire [3:0] simm_cas;
 	wire simm_waitstate;
 	wire simm_mux_select;
+	wire simm_write;
 	simm_controller simm_controller
 	(
 		.reset(reset),
 		.clock(clock),
 
 		.cs(device_selected[`DEVICE_SIMM_POS]),
-		.read(read),
-		.write(write),
+		.as(as),
+		.ds(ds),
+		.rn_w(rn_w),
 		.bank_addr(addr[10 + 11 + 3]),
 		.byte_selects({ upper_upper, upper_mid, lower_mid, lower_lower }),
 
+		.write(simm_write),
 		.ras(simm_ras0),
 		.cas(simm_cas),
 		.waitstate(simm_waitstate),
@@ -251,7 +254,7 @@ module MAXI030Core
 	assign n_simm = ~device_selected[`DEVICE_SIMM_POS];
 	assign n_ras0 = ~simm_ras0;
 	assign n_cas = ~simm_cas;
-	assign n_simm_we = ~(device_selected[`DEVICE_SIMM_POS] & write);
+	assign n_simm_we = ~simm_write;
 	// TODO only one SIMM slot for now
 	assign n_ras1 = 4'hf;
 
