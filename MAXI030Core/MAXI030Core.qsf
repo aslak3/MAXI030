@@ -234,6 +234,7 @@ set_global_assignment -name VERILOG_FILE sys_clear_generator.v
 set_global_assignment -name VERILOG_FILE vector_mapper.v
 set_global_assignment -name VERILOG_FILE byte_select_generator.v
 set_global_assignment -name VERILOG_FILE addr_decode.v
+set_global_assignment -name VERILOG_FILE simm_controller.v
 set_global_assignment -name VERILOG_FILE waitstate_generator.v
 set_global_assignment -name VERILOG_FILE led_register.v
 set_global_assignment -name VERILOG_FILE test_register.v
