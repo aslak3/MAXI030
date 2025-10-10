@@ -65,7 +65,7 @@ module device_decode
                         6'b010101:  device_selected = 1 << `DEVICE_IDE3_POS;  // 0x95
                         6'b010110:  device_selected = 1 << `DEVICE_ETH_POS;   // 0x96
                         6'b111111:  device_selected = 1 << `DEVICE_ROM_POS;   // 0xbf
-                        default:    device_selected =`DEVICE_NULL;
+                        default:    device_selected = `DEVICE_NULL;
                     endcase
                 end else if (addr_upper[7:6] == 2'b11) begin
                     port_width = `PORT_WIDTH_LONG;
