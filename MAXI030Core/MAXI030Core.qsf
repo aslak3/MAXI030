@@ -223,7 +223,7 @@ set_location_assignment PIN_23 -to user[3]
 set_location_assignment PIN_21 -to user[2]
 set_location_assignment PIN_19 -to user[1]
 set_location_assignment PIN_18 -to user[0]
-set_global_assignment -name FLEX10K_OPTIMIZATION_TECHNIQUE SPEED
+set_global_assignment -name FLEX10K_OPTIMIZATION_TECHNIQUE AREA
 set_global_assignment -name FMAX_REQUIREMENT "40 MHz" -section_id CLOCK
 set_instance_assignment -name CLOCK_SETTINGS CLOCK -to clock
 set_global_assignment -name ALLOW_POWER_UP_DONT_CARE OFF
@@ -237,5 +237,6 @@ set_global_assignment -name VERILOG_FILE addr_decode.v
 set_global_assignment -name VERILOG_FILE simm_controller.v
 set_global_assignment -name VERILOG_FILE waitstate_generator.v
 set_global_assignment -name VERILOG_FILE led_register.v
-set_global_assignment -name VERILOG_FILE test_register.v
+set_global_assignment -name VERILOG_FILE interrupts.v
+set_global_assignment -name VERILOG_FILE timer.v
 set_global_assignment -name VERILOG_FILE MAXI030Core.v

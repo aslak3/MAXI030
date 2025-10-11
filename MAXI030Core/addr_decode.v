@@ -98,6 +98,8 @@ module register8_decode
         if (device_register8_selected) begin
             case (addr_lower)
                 8'h00:      register8_selected = 1 << `REGISTER8_LED_POS;
+                8'h01:      register8_selected = 1 << `REGISTER8_INTS_ENABLED_POS;
+                8'h02:      register8_selected = 1 << `REGISTER8_TIMER_CONTROL_POS;
                 default:    register8_selected = `REGISTER8_NULL;
             endcase
         end else begin
@@ -117,7 +119,6 @@ module register16_decode
     always @ (*) begin
         if (device_register16_selected) begin
             case (addr_lower)
-                8'h00:      register16_selected = 1 << `REGISTER16_TEST_POS;
                 default:    register16_selected = `REGISTER16_NULL;
             endcase
         end else begin
@@ -137,7 +138,8 @@ module register32_decode
     always @ (*) begin
         if (device_register32_selected) begin
             case (addr_lower)
-                8'h00:      register32_selected = 1 << `REGISTER32_TEST_POS;
+                8'h00:      register32_selected = 1 << `REGISTER32_TIMER_START_VALUE_POS;
+                8'h04:      register32_selected = 1 << `REGISTER32_TIMER_CURRENT_VALUE_POS;                
                 default:    register32_selected = `REGISTER32_NULL;
             endcase
         end else begin

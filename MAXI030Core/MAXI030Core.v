@@ -269,12 +269,9 @@ module MAXI030Core
     // CPU
     assign n_halt = 1'b1;
     assign n_sterm = 1'b1;
-    assign n_ipl = 3'b111;
-    assign n_avec = 1'b1;
     assign n_cback = 1'b1;
     assign n_br = 1'b1;
     assign n_bgack = 1'b1;
-
     // I2C
     assign scl = 1'b1;
     assign sda = 1'b1;
@@ -289,6 +286,38 @@ module MAXI030Core
     assign n_ide_dma_ack = 1'b1;
     assign n_ide_read = ~read;
     assign n_ide_write = ~write;
+
+    wire [2:0] ipl;
+    assign n_ipl = ~ipl;
+    wire avec;
+    assign n_avec = ~avec;
+    wire timer_irq;
+    int_priority_encoder int_priority_encoder
+    (
+        .ps2_irq(1'b0),
+        .eth_irq(~n_eth_int),
+        .ide_irq(~n_ide_irq),
+        .quart_irq(~n_quart_irq),
+        .timer_irq(timer_irq),
+        .ints_enabled(ints_enabled),
+
+        .ipl(ipl),
+        .avec(avec)
+    );
+
+    wire [31:0] timer_current_value;
+    timer timer
+    (
+        .reset(reset),
+        .clock(clock),
+
+        .start_value(timer_start_value),
+        .start_trigger(timer_start_trigger),
+        .stop_trigger(timer_stop_trigger),
+
+        .irq(timer_irq),
+        .current_value(timer_current_value)
+    );
 
     wire [`REGISTER8_SELECTED_MAXPOS-1:0] register8_selected;
     register8_decode register8_decode
@@ -318,21 +347,26 @@ module MAXI030Core
     );
 
     wire [7:0] data8 =
-        register8_selected[`REGISTER8_LED_POS] ? { 7'b0000000, led } :
-        8'h00;
+        register8_selected[`REGISTER8_LED_POS] ?
+           { 7'b0000000, led } :
+        register8_selected[`REGISTER8_INTS_ENABLED_POS] ?
+            ints_enabled :
+        register8_selected[`REGISTER8_TIMER_CONTROL_POS] ?
+            { 6'b000000, timer_stop_trigger, timer_start_trigger } :
+            8'h00;
 
     wire [15:0] data16 =
-        register16_selected[`REGISTER16_TEST_POS] ? test_data16_out :
         16'h0000;
 
     wire [31:0] data32 =
-        register32_selected[`REGISTER32_TEST_POS] ? test_data32_out :
+        register32_selected[`REGISTER32_TIMER_START_VALUE_POS] ? timer_start_value :
+        register32_selected[`REGISTER32_TIMER_CURRENT_VALUE_POS] ? timer_current_value :        
         32'h00000000;
 
     assign data =
-        read & device_selected[`DEVICE_REGISTER8_POS] ? { data8, 24'h000000 } :
-        read & device_selected[`DEVICE_REGISTER16_POS] ? { data16, 16'h0000 } :
-        read & device_selected[`DEVICE_REGISTER32_POS] ? data32 :
+        read & device_selected[`DEVICE_REGISTER8_POS] ?     { data8, 24'h000000 } :
+        read & device_selected[`DEVICE_REGISTER16_POS] ?    { data16, 16'h0000 } :
+        read & device_selected[`DEVICE_REGISTER32_POS] ?    data32 :
         32'hzzzzzzzz;
 
     led_register led_register
@@ -342,35 +376,40 @@ module MAXI030Core
 
         .write(write),
         .cs(register8_selected[`REGISTER8_LED_POS]),
-        .data_in(data[31:24]),
+        .data_in(data),
 
         .led(led)
     );
 
-    wire [15:0] test_data16_out;
-    test_register16 test_register16
+    wire [7:0] ints_enabled;
+    ints_enabled_register ints_enabled_register
     (
         .reset(reset),
         .clock(clock),
 
         .write(write),
-        .cs(register16_selected[`REGISTER16_TEST_POS]),
+        .cs(register8_selected[`REGISTER8_INTS_ENABLED_POS]),
         .data_in(data),
 
-        .data_out(test_data16_out)
+        .ints_enabled(ints_enabled)
     );
 
-    wire [31:0] test_data32_out;
-    test_register32 test_register32
+    wire [31:0] timer_start_value;
+    wire timer_start_trigger;
+    wire timer_stop_trigger;
+    timer_registers timer_registers
     (
         .reset(reset),
         .clock(clock),
 
         .write(write),
-        .cs(register32_selected[`REGISTER32_TEST_POS]),
+        .start_value_cs(register32_selected[`REGISTER32_TIMER_START_VALUE_POS]),
+        .control_cs(register8_selected[`REGISTER8_TIMER_CONTROL_POS]),
         .data_in(data),
 
-        .data_out(test_data32_out)
+        .start_value(timer_start_value),
+        .start_trigger(timer_start_trigger),
+        .stop_trigger(timer_stop_trigger)
     );
 
     sys_clear_generator sys_clear_generator
