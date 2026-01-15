@@ -38,7 +38,7 @@ begin
 						if (counter = "111") then
 							-- Done. Mark not running and grab input byte
 							running <= '0';
-						end if;					
+						end if;
 					end if;
 					-- Invert
 					tick <= not tick;
@@ -46,7 +46,7 @@ begin
 			end if;
 		end if;
 	end process;
-	
+
 	-- Send out MSB and set clock
 	mosi <= out_state(7) when running = '1' else '0';
 	sclk <= tick when running = '1' else '0';

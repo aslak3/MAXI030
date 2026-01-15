@@ -62,20 +62,20 @@ begin
 			if (scancode_rx_counter = x"ffff") then
 				state <= RX_START;
 			end if;
-			
+
 			scancode_rx_counter <= scancode_rx_counter + '1';
-			
+
 			if (edge_found = '0' and last_edge_found = '1' and tx_ready = '1') then
 				scancode_rx_counter <= (others => '0');
-				
-				case state is			
+
+				case state is
 					when RX_START =>
 						parity_error <= '0';
 						byte_counter <= 0;
 						byte_buffer <= x"00";
 						parity_check <= '1'; --'0';
 						state <= RX_BYTE;
-						
+
 					when RX_BYTE =>
 						parity_check <= parity_check xor ps2_data;
 						byte_buffer (byte_counter) <= ps2_data;
@@ -83,7 +83,7 @@ begin
 							state <= RX_ODD_PARITY;
 						end if;
 						byte_counter <= byte_counter + 1;
-					
+
 					when RX_ODD_PARITY =>
 						-- Check for an even number of ones: good!
 						if (parity_check = not ps2_data) then
@@ -156,7 +156,7 @@ begin
 				ps2_clock <= '0';
 				tx_ready <= '0';
 			end if;
-			
+
 			-- Send a "reqest to send" pulse on data
 			if (request_to_send1 = '1') then
 				if (clock_counter = "111111111") then
@@ -179,7 +179,7 @@ begin
 				end if;
 				clock_counter <= clock_counter + '1';
 			end if;
-			
+
 			-- Send start bit, but at this point the device is not driving the clock
 			if (request_to_send3 = '1') then
 				if (clock_counter = "111111111") then
@@ -191,7 +191,7 @@ begin
 				end if;
 				clock_counter <= clock_counter + '1';
 			end if;
-			
+
 			if (tx_busy = '1' and edge_found = '0' and last_edge_found = '1') then
 				case state is
 					when TX_BYTE =>
@@ -202,22 +202,22 @@ begin
 							state <= TX_ODD_PARITY;
 						end if;
 						byte_counter <= byte_counter + 1;
-						
+
 					when TX_ODD_PARITY =>
 						ps2_data <= not parity_check;
 						state <= TX_STOP;
-						
+
 					when TX_STOP =>
 						ps2_data <= '1';
 						state <= TX_END;
-						
+
 					when TX_END =>
 						tx_busy <= '0';
 						tx_data_driven <= '0';
 						tx_ready <= '1';
 						state <= TX_BYTE;
 
-				end case;									
+				end case;
 			end if;
 		end if;
 	end process;

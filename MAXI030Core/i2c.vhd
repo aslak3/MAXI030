@@ -199,7 +199,7 @@ begin
 	end process;
 
 	busy <= running;--'0' when (state = READ_WAITING or state = WRITE_WAITING or state = START1) else '1';
-	
+
 	-- Tri-state if the internal signal is 1
 	scl <= 'Z' when (scl_local = '1') else '0';
 	sda <= 'Z' when (sda_local = '1') else '0';

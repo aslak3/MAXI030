@@ -35,7 +35,7 @@ begin
 				end if;
 				baud_counter := baud_counter - 1;
 			end if;
-				
+
 			case state is
 				when IDLE =>
 					tx <= '1';
@@ -45,14 +45,14 @@ begin
 						sending := '1';
 						state := START;
 					end if;
-					
+
 				when START =>
 					tx <= '0';
 					if (baud_counter = 0) then
 						state := DATA;
 						bit_counter := 0;
 					end if;
-					
+
 				when DATA =>
 					tx <= write_data (bit_counter);
 					if (baud_counter = 0) then
@@ -62,13 +62,13 @@ begin
 							bit_counter := bit_counter + 1;
 						end if;
 					end if;
-					
+
 				when STOP =>
 					tx <= '1';
 					if (baud_counter = 0) then
 						state := IDLE;
 					end if;
-			end case;					
+			end case;
 		end if;
 	end process;
 
@@ -88,7 +88,7 @@ begin
 				end if;
 				baud_counter := baud_counter - 1;
 			end if;
-				
+
 			case state is
 				when IDLE =>
 					framing_error_set <= '0';
@@ -99,7 +99,7 @@ begin
 						receiving := '1';
 						state := START;
 					end if;
-					
+
 				when START =>
 					if (baud_counter = 0) then
 						if (rx = '1') then
@@ -108,7 +108,7 @@ begin
 						bit_counter := 0;
 						state := DATA;
 					end if;
-					
+
 				when DATA =>
 					read_data (bit_counter) <= rx;
 					if (baud_counter = 0) then
@@ -118,7 +118,7 @@ begin
 							bit_counter := bit_counter + 1;
 						end if;
 					end if;
-					
+
 				when STOP =>
 					if (baud_counter = 0) then
 						if (rx = '0') then
@@ -127,7 +127,7 @@ begin
 						rx_ready_set <= '1';
 						state := IDLE;
 					end if;
-			end case;					
+			end case;
 		end if;
 	end process;
 end architecture;
