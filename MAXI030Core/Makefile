@@ -35,6 +35,8 @@ all: verilate
 	$(SSH) 'cd $(DIR); quartus_map $(PROJECT)'
 	$(SSH) 'cd $(DIR); quartus_fit $(PROJECT)'
 	$(SSH) 'cd $(DIR); quartus_asm $(PROJECT)'
+	$(SSH) 'cd $(DIR); quartus_tan $(PROJECT)'
+	$(SSH) 'cd $(DIR); grep -A 8 "Clock Setup:" $(PROJECT).tan.summary'
 
 program_fpga:
 	$(SSH) 'cd $(DIR); quartus_pgm --mode JTAG --operation p\;$(PROJECT).sof@3'
