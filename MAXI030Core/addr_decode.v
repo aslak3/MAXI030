@@ -30,6 +30,7 @@ module device_decode
         input       function_normal_selected,
         input       vector_fetched,
         input       [7:0] addr_upper,
+        input       [3:0] addr_middle,
 
         output reg  [`DEVICE_SELECTED_MAXPOS-1:0] device_selected,
         output reg  [`PORT_WIDTH_WIDTH-1:0] port_width
@@ -38,50 +39,46 @@ module device_decode
     always @ (*) begin
         if (function_normal_selected == 1'b1) begin
             if (vector_fetched == 1'b0) begin
-                port_width = `PORT_WIDTH_WORD;
-                device_selected = 1 << `DEVICE_ROM_POS;
+                port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_ROM_POS;
             end else begin
                 if (addr_upper[7:6] == 2'b00) begin
-                    // port_width = `PORT_WIDTH_LONG;
-                    // device_selected = (1 << `DEVICE_SIMM;
-                    port_width = `PORT_WIDTH_WORD;
-                    device_selected = 1 << `DEVICE_SLOT0_POS;
-                end else if (addr_upper[7:6] == 2'b01) begin
-                    port_width = `PORT_WIDTH_BYTE;
-                    case (addr_upper[5:0])
-                        6'b000000:  device_selected = 1 << `DEVICE_REGISTER8_POS; // 0x40
-                        6'b010000:  device_selected = 1 << `DEVICE_QUART_POS; // 0x50
-                        default:    device_selected = `DEVICE_NULL;
-                    endcase
+                    // port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_SLOT0_POS;
+                    port_width = `PORT_WIDTH_LONG; device_selected = 1 << `DEVICE_SIMM_POS;
+                end else if (addr_upper == 8'h40) begin
+                    port_width = `PORT_WIDTH_WORD;  device_selected = 1 << `DEVICE_SLOT0_POS;
+                end else if (addr_upper == 8'h41) begin
+                    port_width = `PORT_WIDTH_WORD;  device_selected = 1 << `DEVICE_SLOT1_POS;
+                end else if (addr_upper == 8'h42) begin
+                    port_width = `PORT_WIDTH_WORD;  device_selected = 1 << `DEVICE_SLOT2_POS;
+                end else if (addr_upper == 8'h43) begin
+                    port_width = `PORT_WIDTH_WORD;  device_selected = 1 << `DEVICE_SLOT3_POS;
+                end else if (addr_upper == 8'h44) begin
+                    if (addr_middle == 4'h0) begin
+                        port_width = `PORT_WIDTH_BYTE;
+                        device_selected = 1 << `DEVICE_REGISTER8_POS;
+                    end else if (addr_middle == 4'h0) begin
+                        port_width = `PORT_WIDTH_BYTE; device_selected = 1 << `DEVICE_REGISTER8_POS;
+                    end else if (addr_middle == 4'h1) begin
+                        port_width = `PORT_WIDTH_BYTE; device_selected = 1 << `DEVICE_QUART_POS;
+                    end else if (addr_middle == 4'h2) begin
+                        port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_IDE1_POS;
+                    end else if (addr_middle == 4'h3) begin
+                        port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_IDE3_POS;
+                    end else if (addr_middle == 4'h4) begin
+                        port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_ETH_POS;
+                    end else begin
+                        port_width = `PORT_WIDTH_NULL; device_selected = 1 << `DEVICE_NULL;
+                    end
                 end else if (addr_upper[7:6] == 2'b10) begin
-                    port_width = `PORT_WIDTH_WORD;
-                    case (addr_upper[5:0])
-                        6'b000000:  device_selected = 1 << `DEVICE_REGISTER16_POS; // 0x80                    
-                        6'b010000:  device_selected = 1 << `DEVICE_SLOT0_POS; // 0x90
-                        6'b010001:  device_selected = 1 << `DEVICE_SLOT1_POS; // 0x91
-                        6'b010010:  device_selected = 1 << `DEVICE_SLOT2_POS; // 0x92
-                        6'b010011:  device_selected = 1 << `DEVICE_SLOT3_POS; // 0x93
-                        6'b010100:  device_selected = 1 << `DEVICE_IDE1_POS;  // 0x94
-                        6'b010101:  device_selected = 1 << `DEVICE_IDE3_POS;  // 0x95
-                        6'b010110:  device_selected = 1 << `DEVICE_ETH_POS;   // 0x96
-                        6'b111111:  device_selected = 1 << `DEVICE_ROM_POS;   // 0xbf
-                        default:    device_selected = `DEVICE_NULL;
-                    endcase
-                end else if (addr_upper[7:6] == 2'b11) begin
-                    port_width = `PORT_WIDTH_LONG;
-                    case (addr_upper[5:0])
-                        6'b000000:  device_selected = 1 << `DEVICE_REGISTER32_POS; // 0xc0
-                        6'b010000:  device_selected = 1 << `DEVICE_SIMM_POS; // 0xd0
-                        default:    device_selected = `DEVICE_NULL;
-                    endcase
+                    port_width = `PORT_WIDTH_LONG; device_selected = 1 << `DEVICE_SIMM_POS;
+                end else if (addr_upper == 8'hff) begin
+                    port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_ROM_POS;
                 end else begin
-                    port_width = `PORT_WIDTH_NULL;
-                    device_selected = `DEVICE_NULL;
+                    port_width = `PORT_WIDTH_NULL; device_selected = 1 << `DEVICE_NULL;
                 end
             end
         end else begin
-            port_width = `PORT_WIDTH_NULL;
-            device_selected = `DEVICE_NULL;
+            port_width = `PORT_WIDTH_NULL; device_selected = `DEVICE_NULL;
         end
     end
 endmodule
@@ -100,6 +97,7 @@ module register8_decode
                 8'h00:      register8_selected = 1 << `REGISTER8_LED_POS;
                 8'h01:      register8_selected = 1 << `REGISTER8_INTS_ENABLED_POS;
                 8'h02:      register8_selected = 1 << `REGISTER8_TIMER_CONTROL_POS;
+                8'h0c:      register8_selected = 1 << `REGISTER8_SPI_DATA_POS;
                 default:    register8_selected = `REGISTER8_NULL;
             endcase
         end else begin
@@ -139,7 +137,7 @@ module register32_decode
         if (device_register32_selected) begin
             case (addr_lower)
                 8'h00:      register32_selected = 1 << `REGISTER32_TIMER_START_VALUE_POS;
-                8'h04:      register32_selected = 1 << `REGISTER32_TIMER_CURRENT_VALUE_POS;                
+                8'h04:      register32_selected = 1 << `REGISTER32_TIMER_CURRENT_VALUE_POS;
                 default:    register32_selected = `REGISTER32_NULL;
             endcase
         end else begin

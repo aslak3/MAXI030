@@ -161,6 +161,7 @@ module MAXI030Core
         .function_normal_selected(function_selected[`FUNCTION_NORMAL_POS]),
         .vector_fetched(vector_fetched),
         .addr_upper(addr[31:24]),
+        .addr_middle(addr[19:16]),
 
         .device_selected(device_selected),
         .port_width(port_width)
@@ -228,6 +229,7 @@ module MAXI030Core
         ) ? 1'b0 : 1'b1;
 
     wire [3:0] simm_ras0;
+    wire [3:0] simm_ras1;
     wire [3:0] simm_cas;
     wire simm_waitstate;
     wire simm_mux_select;
@@ -238,13 +240,16 @@ module MAXI030Core
         .clock(clock),
 
         .cs(device_selected[`DEVICE_SIMM_POS]),
+        .as(as),
         .ds(ds),
         .rn_w(rn_w),
         .bank_addr(addr[10 + 11 + 3]),
+        .slot_addr(addr[10 + 11 + 3 + 1]),
         .byte_selects({ upper_upper, upper_mid, lower_mid, lower_lower }),
 
         .write(simm_write),
-        .ras(simm_ras0),
+        .ras0(simm_ras0),
+        .ras1(simm_ras1),
         .cas(simm_cas),
         .waitstate(simm_waitstate),
         .mux_select(simm_mux_select)
@@ -252,10 +257,9 @@ module MAXI030Core
 
     assign n_simm = ~device_selected[`DEVICE_SIMM_POS];
     assign n_ras0 = ~simm_ras0;
+    assign n_ras1 = ~simm_ras1;
     assign n_cas = ~simm_cas;
     assign n_simm_we = ~simm_write;
-    // TODO only one SIMM slot for now
-    assign n_ras1 = 4'hf;
 
     simm_mux simm_mux
     (
@@ -360,7 +364,7 @@ module MAXI030Core
 
     wire [31:0] data32 =
         register32_selected[`REGISTER32_TIMER_START_VALUE_POS] ? timer_start_value :
-        register32_selected[`REGISTER32_TIMER_CURRENT_VALUE_POS] ? timer_current_value :        
+        register32_selected[`REGISTER32_TIMER_CURRENT_VALUE_POS] ? timer_current_value :
         32'h00000000;
 
     assign data =
@@ -380,6 +384,23 @@ module MAXI030Core
 
         .led(led)
     );
+
+    wire running;
+    spi_interface spi_interface
+    (
+        .reset(reset),
+        .clock(clock),
+
+        .write(write),
+        .data_in_cs(register8_selected[`REGISTER8_SPI_DATA_POS]),
+        .data_in(data),
+
+        .sclk(user[0]),
+        .mosi(user[1]),
+
+        .running(running)
+    );
+    assign user[2] = ~running;
 
     wire [7:0] ints_enabled;
     ints_enabled_register ints_enabled_register
@@ -419,5 +440,7 @@ module MAXI030Core
         .sys_clear(sys_clear)
     );
 
-    assign user = 5'b00000;
+    // assign user[2] = 1'b0;
+    assign user[3] = 1'b0;
+    assign user[4] = 1'b0;
 endmodule

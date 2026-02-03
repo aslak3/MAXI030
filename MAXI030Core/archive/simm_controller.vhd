@@ -13,9 +13,11 @@ entity simm_controller is
 			ds : in STD_LOGIC;
 			rn_w : in STD_LOGIC;
 			bank_addr : in STD_LOGIC;
+			slot_addr : in STD_LOGIC;
 			byte_selects : in STD_LOGIC_VECTOR (3 downto 0);
 			write : out STD_LOGIC;
-			ras : out STD_LOGIC_VECTOR (3 downto 0);
+			ras0 : out STD_LOGIC_VECTOR (3 downto 0);
+			ras1 : out STD_LOGIC_VECTOR (3 downto 0);
 			cas : out STD_LOGIC_VECTOR (3 downto 0);
 			waitstate : out STD_LOGIC;
 			mux_select : out STD_LOGIC);
@@ -32,7 +34,8 @@ begin
 		if (reset = '1') then
 			write <= '0';
 			mux_select <= '1';
-			ras <= "0000";
+			ras0 <= "0000";
+			ras1 <= "0000";
 			cas <= "0000";
 			waitstate <= '1';
 			state := IDLE;
@@ -42,12 +45,13 @@ begin
 				refresh_count := 0;
 				needs_refresh := '1';
 			end if;
-			
+
 			case state is
 				when IDLE =>
 					write <= '0';
 					mux_select <= '0';
-					ras <= "0000";
+					ras0 <= "0000";
+					ras1 <= "0000";
 					cas <= "0000";
 					waitstate <= '1';
 
@@ -56,10 +60,18 @@ begin
 						state := REFRESH1;
 					elsif (simm = '1' and ds = '1' and as = '1') then
 						write <= not rn_w;
-						if (bank_addr = '0') then
-							ras <= "0101";
+						if (slot_addr = '0') then
+							if (bank_addr = '0') then
+								ras0 <= "0101";
+							else
+								ras0 <= "1010";
+							end if;
 						else
-							ras <= "1010";
+							if (bank_addr = '1') then
+								ras1 <= "0101";
+							else
+								ras1 <= "1010";
+							end if;
 						end if;
 						state := MEMRW1;
 					else
@@ -91,7 +103,8 @@ begin
 					state := REFRESH2;
 
 				when REFRESH2 =>
-					ras <= "1111";
+					ras0 <= "1111";
+					ras1 <= "1111";
 					state := REFRESH3;
 
 				when REFRESH3 =>
@@ -99,7 +112,8 @@ begin
 					state := REFRESH4;
 
 				when REFRESH4 =>
-					ras <= "0000";
+					ras0 <= "0000";
+					ras1 <= "0000";
 					state := IDLE;
 			end case;
 		end if;

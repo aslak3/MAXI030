@@ -12,7 +12,8 @@ VVP = vvp
 
 V_SRC = MAXI030Core.v \
 	addr_decode.v sys_clear_generator.v byte_select_generator.v simm_controller.v \
-	vector_mapper.v led_register.v waitstate_generator.v interrupts.v timer.v
+	vector_mapper.v led_register.v waitstate_generator.v interrupts.v timer.v \
+	spi/spi_interface.v spi/spi.v
 
 ALL_TESTBENCHES = simm_controller_tb
 

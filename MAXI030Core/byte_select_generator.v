@@ -10,7 +10,8 @@ module byte_select_generator
 
     // Selects for 16 bit ports (writes)
     assign upper = (
-            (a0 == 1'b0) || (rn_w == 1'b1)
+            (a0 == 1'b0) ||
+            (rn_w == 1'b1)
         ) ? 1'b1 : 1'b0;
     assign lower = (
             (a0 == 1'b1 || siz0 == 1'b0 || siz1 == 1'b1) ||
@@ -24,7 +25,8 @@ module byte_select_generator
         ) ? 1'b1 : 1'b0;
     assign upper_mid = (
             (a0 == 1'b1 && a1 == 1'b0) ||
-            (a1 == 1'b0 && (siz0 == 1'b0 || siz1 == 1'b1)) ||
+            (a1 == 1'b0 && siz0 == 1'b0) ||
+            (a1 == 1'b0 && siz1 == 1'b1) ||
             (rn_w == 1'b1)
         ) ? 1'b1 : 1'b0;
     assign lower_mid = (

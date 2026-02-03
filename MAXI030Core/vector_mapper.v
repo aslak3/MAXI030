@@ -1,3 +1,5 @@
+/* verilator lint_off MULTITOP */
+
 module vector_mapper
     (
         input clock,
@@ -12,7 +14,7 @@ module vector_mapper
 
     always @ (posedge clock) begin
         if (reset == 1'b1) begin
-            shifter <= 5'b00000; // Initialize shift register to 
+            shifter <= 5'b00000; // Initialize shift register to
             last_as <= 1'b1;
         end else begin
             if (as == 1'b0 && last_as == 1'b1) begin

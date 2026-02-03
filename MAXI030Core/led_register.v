@@ -1,3 +1,5 @@
+/* verilator lint_off MULTITOP */
+
 module led_register
     (
         input reset,
@@ -6,7 +8,7 @@ module led_register
         input write,
         input cs,
         input [31:0] data_in,
-        
+
         output reg led
     );
 

@@ -6,13 +6,16 @@ module simm_controller
         input clock,
 
         input cs,
+        input as,
         input ds,
         input rn_w,
         input bank_addr,
+        input slot_addr,
         input [3:0] byte_selects,
 
         output reg write,
-        output reg [3:0] ras,
+        output reg [3:0] ras0,
+        output reg [3:0] ras1,
         output reg [3:0] cas,
         output reg waitstate,
         output reg mux_select
@@ -28,7 +31,7 @@ module simm_controller
     localparam REFRESH4 = 6;
 
     reg [7:0] refresh_count;
-    integer state;
+    reg [2:0] state;
     reg needs_refresh;
 
     always @ (posedge clock) begin
@@ -36,7 +39,8 @@ module simm_controller
             refresh_count <= 8'd0;
             write <= 1'b0;
             mux_select <= 1'b1;
-            ras <= 4'b0000;
+            ras0 <= 4'b0000;
+            ras1 <= 4'b0000;
             cas <= 4'b0000;
             waitstate <= 1'b1;
             needs_refresh <= 1'b0;
@@ -52,19 +56,28 @@ module simm_controller
                 IDLE: begin
                     write <= 1'b0;
                     mux_select <= 1'b0;
-                    ras <= 4'b0000;
+                    ras0 <= 4'b0000;
+                    ras1 <= 4'b0000;
                     cas <= 4'b0000;
                     waitstate <= 1'b1;
 
                     if (needs_refresh) begin
                         needs_refresh <= 1'b0;
                         state <= REFRESH1;
-                    end else if (cs && ds) begin
+                    end else if (cs && as && ds) begin
                         write <= ~rn_w;
-                        if (bank_addr) begin
-                            ras <= 4'b0101;
+                        if (slot_addr == 1'b0) begin
+                            if (bank_addr == 1'b0) begin
+                                ras0 <= 4'b0101;
+                            end else begin
+                                ras0 <= 4'b1010;
+                            end
                         end else begin
-                            ras <= 4'b1010;
+                            if (bank_addr == 1'b0) begin
+                                ras1 <= 4'b0101;
+                            end else begin
+                                ras1 <= 4'b1010;
+                            end
                         end
                         state <= MEMRW1;
                     end else begin
@@ -100,7 +113,8 @@ module simm_controller
                 end
 
                 REFRESH2: begin
-                    ras <= 4'b1111;
+                    ras0 <= 4'b1111;
+                    ras1 <= 4'b1111;
                     state <= REFRESH3;
                 end
 
@@ -110,7 +124,8 @@ module simm_controller
                 end
 
                 REFRESH4: begin
-                    ras <= 4'b0000;
+                    ras0 <= 4'b0000;
+                    ras1 <= 4'b0000;
                     state <= IDLE;
                 end
             endcase

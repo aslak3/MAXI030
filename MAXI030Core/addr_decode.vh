@@ -42,7 +42,8 @@
 `define REGISTER8_LED_POS               0
 `define REGISTER8_INTS_ENABLED_POS      1
 `define REGISTER8_TIMER_CONTROL_POS     2
-`define REGISTER8_SELECTED_MAXPOS       3
+`define REGISTER8_SPI_DATA_POS          3
+`define REGISTER8_SELECTED_MAXPOS       4
 
 `define REGISTER8_NULL                  {`REGISTER8_SELECTED_MAXPOS{1'b0}}
 
