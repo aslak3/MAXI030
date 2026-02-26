@@ -13,6 +13,7 @@ VVP = vvp
 V_SRC = MAXI030Core.v \
 	addr_decode.v sys_clear_generator.v byte_select_generator.v simm_controller.v \
 	vector_mapper.v led_register.v waitstate_generator.v interrupts.v timer.v \
+	brom.v \
 	spi/spi_interface.v spi/spi.v
 
 ALL_TESTBENCHES = simm_controller_tb
@@ -38,6 +39,7 @@ all: verilate
 	$(SSH) 'cd $(DIR); quartus_asm $(PROJECT)'
 	$(SSH) 'cd $(DIR); quartus_tan $(PROJECT)'
 	$(SSH) 'cd $(DIR); grep -A 8 "Clock Setup:" $(PROJECT).tan.summary'
+	$(SSH) 'cd $(DIR); cat $(PROJECT).fit.summary'
 
 program_fpga:
 	$(SSH) 'cd $(DIR); quartus_pgm --mode JTAG --operation p\;$(PROJECT).sof@3'

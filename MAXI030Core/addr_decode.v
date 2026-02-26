@@ -13,10 +13,10 @@ module function_decode
     );
 
     always @ (*) begin
-        if (!as) begin
+        if (as == 1'b0) begin
             function_selected = `FUNCTION_NULL;
         end else begin
-             casez ({fc, addr_middle, fpu_sense})
+            casez ({fc, addr_middle, fpu_sense})
                 {3'b111, 4'h2, 1'b1}:   function_selected = 1 << `FUNCTION_FPU_POS;
                 {3'b111, 4'hf, 1'b?}:   function_selected = 1 << `FUNCTION_INT_ACK_POS;
                 default:                function_selected = 1 << `FUNCTION_NORMAL_POS;
@@ -45,13 +45,13 @@ module device_decode
                     // port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_SLOT0_POS;
                     port_width = `PORT_WIDTH_LONG; device_selected = 1 << `DEVICE_SIMM_POS;
                 end else if (addr_upper == 8'h40) begin
-                    port_width = `PORT_WIDTH_WORD;  device_selected = 1 << `DEVICE_SLOT0_POS;
+                    port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_SLOT0_POS;
                 end else if (addr_upper == 8'h41) begin
-                    port_width = `PORT_WIDTH_WORD;  device_selected = 1 << `DEVICE_SLOT1_POS;
+                    port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_SLOT1_POS;
                 end else if (addr_upper == 8'h42) begin
-                    port_width = `PORT_WIDTH_WORD;  device_selected = 1 << `DEVICE_SLOT2_POS;
+                    port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_SLOT2_POS;
                 end else if (addr_upper == 8'h43) begin
-                    port_width = `PORT_WIDTH_WORD;  device_selected = 1 << `DEVICE_SLOT3_POS;
+                    port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_SLOT3_POS;
                 end else if (addr_upper == 8'h44) begin
                     if (addr_middle == 4'h0) begin
                         port_width = `PORT_WIDTH_BYTE;
@@ -67,14 +67,16 @@ module device_decode
                     end else if (addr_middle == 4'h4) begin
                         port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_ETH_POS;
                     end else begin
-                        port_width = `PORT_WIDTH_NULL; device_selected = 1 << `DEVICE_NULL;
+                        port_width = `PORT_WIDTH_NULL; device_selected = `DEVICE_NULL;
                     end
+                end else if (addr_upper == 8'hf0) begin
+                    port_width = `PORT_WIDTH_LONG; device_selected = 1 << `DEVICE_BROM_POS;
                 end else if (addr_upper[7:6] == 2'b10) begin
                     port_width = `PORT_WIDTH_LONG; device_selected = 1 << `DEVICE_SIMM_POS;
                 end else if (addr_upper == 8'hff) begin
                     port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_ROM_POS;
                 end else begin
-                    port_width = `PORT_WIDTH_NULL; device_selected = 1 << `DEVICE_NULL;
+                    port_width = `PORT_WIDTH_NULL; device_selected = `DEVICE_NULL;
                 end
             end
         end else begin
@@ -98,7 +100,7 @@ module register8_decode
                 8'h01:      register8_selected = 1 << `REGISTER8_INTS_ENABLED_POS;
                 8'h02:      register8_selected = 1 << `REGISTER8_TIMER_CONTROL_POS;
                 8'h0c:      register8_selected = 1 << `REGISTER8_SPI_DATA_POS;
-                default:    register8_selected = `REGISTER8_NULL;
+                default:    register8_selected =      `REGISTER8_NULL;
             endcase
         end else begin
             register8_selected = `REGISTER8_NULL;
@@ -138,7 +140,7 @@ module register32_decode
             case (addr_lower)
                 8'h00:      register32_selected = 1 << `REGISTER32_TIMER_START_VALUE_POS;
                 8'h04:      register32_selected = 1 << `REGISTER32_TIMER_CURRENT_VALUE_POS;
-                default:    register32_selected = `REGISTER32_NULL;
+                default:    register32_selected =      `REGISTER32_NULL;
             endcase
         end else begin
             register32_selected = `REGISTER32_NULL;

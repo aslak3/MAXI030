@@ -170,11 +170,31 @@ module MAXI030Core
     wire quart_waitstate;
     waitstate_generator #(
         .DELAY(4'h2)
-    ) waitstate_generator (
+    ) quart_waitstate_generator (
         .clock(clock),
         .cs(device_selected[`DEVICE_QUART_POS]),
 
         .waitstate(quart_waitstate)
+    );
+
+    wire rom_waitstate;
+    waitstate_generator #(
+        .DELAY(4'h2)
+    ) rom_waitstate_generator (
+        .clock(clock),
+        .cs(device_selected[`DEVICE_ROM_POS]),
+
+        .waitstate(rom_waitstate)
+    );
+
+    wire eth_waitstate;
+    waitstate_generator #(
+        .DELAY(4'h2)
+    ) eth_waitstate_generator (
+        .clock(clock),
+        .cs(device_selected[`DEVICE_ETH_POS]),
+
+        .waitstate(eth_waitstate)
     );
 
     // Device chip selects
@@ -189,6 +209,8 @@ module MAXI030Core
     // DSACK
     assign n_dsack =    function_selected[`FUNCTION_FPU_POS] ? 2'bzz :
                         quart_waitstate ? 2'b11 :
+                        rom_waitstate ? 2'b11 :
+                        eth_waitstate ? 2'b11 :
                         simm_waitstate & device_selected[`DEVICE_SIMM_POS] ? 2'b11 :
                         port_width;
 
@@ -223,7 +245,7 @@ module MAXI030Core
     assign n_berr = function_selected[`FUNCTION_NORMAL_POS] & (
         (device_selected == `DEVICE_NULL) |
         // TODO fix bootloader or implement buzzer, etc
-        // (device_selected[`DEVICE_REGISTER8_POS] & register8_selected == `REGISTER8_NULL) |
+        (device_selected[`DEVICE_REGISTER8_POS] & register8_selected == `REGISTER8_NULL) |
         (device_selected[`DEVICE_REGISTER16_POS] & register16_selected == `REGISTER16_NULL) |
         (device_selected[`DEVICE_REGISTER32_POS] & register32_selected == `REGISTER32_NULL)
         ) ? 1'b0 : 1'b1;
@@ -292,9 +314,9 @@ module MAXI030Core
     assign n_ide_write = ~write;
 
     wire [2:0] ipl;
-    assign n_ipl = ~ipl;
+    assign n_ipl = 3'b111; // ~ipl;
     wire avec;
-    assign n_avec = ~avec;
+    assign n_avec = 1'b1; // ~avec;
     wire timer_irq;
     int_priority_encoder int_priority_encoder
     (
@@ -371,6 +393,7 @@ module MAXI030Core
         read & device_selected[`DEVICE_REGISTER8_POS] ?     { data8, 24'h000000 } :
         read & device_selected[`DEVICE_REGISTER16_POS] ?    { data16, 16'h0000 } :
         read & device_selected[`DEVICE_REGISTER32_POS] ?    data32 :
+        read & device_selected[`DEVICE_BROM_POS] ? brom_dout :
         32'hzzzzzzzz;
 
     led_register led_register
@@ -400,7 +423,6 @@ module MAXI030Core
 
         .running(running)
     );
-    assign user[2] = ~running;
 
     wire [7:0] ints_enabled;
     ints_enabled_register ints_enabled_register
@@ -433,6 +455,16 @@ module MAXI030Core
         .stop_trigger(timer_stop_trigger)
     );
 
+    wire [31:0] brom_dout;
+    brom brom
+    (
+        .clock(clock),
+
+        .addr(addr[10:2]),
+
+        .dout(brom_dout)
+    );
+
     sys_clear_generator sys_clear_generator
     (
         .clock(clock),
@@ -440,7 +472,7 @@ module MAXI030Core
         .sys_clear(sys_clear)
     );
 
-    // assign user[2] = 1'b0;
-    assign user[3] = 1'b0;
+    assign user[2] = device_selected[`DEVICE_SIMM_POS];
+    assign user[3] = device_selected[`DEVICE_QUART_POS];
     assign user[4] = 1'b0;
 endmodule

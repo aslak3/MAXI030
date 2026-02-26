@@ -34,7 +34,8 @@
 `define DEVICE_ROM_POS                  11
 // 32 bit port
 `define DEVICE_REGISTER32_POS           12
-`define DEVICE_SELECTED_MAXPOS          13
+`define DEVICE_BROM_POS                 13
+`define DEVICE_SELECTED_MAXPOS          14
 
 `define DEVICE_NULL                     {`DEVICE_SELECTED_MAXPOS{1'b0}}
 

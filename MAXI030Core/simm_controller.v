@@ -25,10 +25,11 @@ module simm_controller
     localparam IDLE = 0;
     localparam MEMRW1 = 1;
     localparam MEMRW2 = 2;
-    localparam REFRESH1 = 3;
-    localparam REFRESH2 = 4;
-    localparam REFRESH3 = 5;
-    localparam REFRESH4 = 6;
+    localparam MEMRW3 = 3;
+    localparam REFRESH1 = 4;
+    localparam REFRESH2 = 5;
+    localparam REFRESH3 = 6;
+    localparam REFRESH4 = 7;
 
     reg [7:0] refresh_count;
     reg [2:0] state;
@@ -65,20 +66,6 @@ module simm_controller
                         needs_refresh <= 1'b0;
                         state <= REFRESH1;
                     end else if (cs && as && ds) begin
-                        write <= ~rn_w;
-                        if (slot_addr == 1'b0) begin
-                            if (bank_addr == 1'b0) begin
-                                ras0 <= 4'b0101;
-                            end else begin
-                                ras0 <= 4'b1010;
-                            end
-                        end else begin
-                            if (bank_addr == 1'b0) begin
-                                ras1 <= 4'b0101;
-                            end else begin
-                                ras1 <= 4'b1010;
-                            end
-                        end
                         state <= MEMRW1;
                     end else begin
                         state <= IDLE;
@@ -86,11 +73,29 @@ module simm_controller
                 end
 
                 MEMRW1: begin
-                    mux_select <= 1'b1;
+                    write <= ~rn_w;
+                    if (slot_addr == 1'b0) begin
+                        if (bank_addr == 1'b0) begin
+                            ras0 <= 4'b0101;
+                        end else begin
+                            ras0 <= 4'b1010;
+                        end
+                    end else begin
+                        if (bank_addr == 1'b0) begin
+                            ras1 <= 4'b0101;
+                        end else begin
+                            ras1 <= 4'b1010;
+                        end
+                    end
                     state <= MEMRW2;
                 end
 
                 MEMRW2: begin
+                    mux_select <= 1'b1;
+                    state <= MEMRW3;
+                end
+
+                MEMRW3: begin
                     if (rn_w == 1'b0) begin
                         // Writing? Select only needed bytes
                         cas <= byte_selects;
@@ -100,7 +105,7 @@ module simm_controller
                     end
 
                     waitstate <= 1'b0;
-                    if (cs) begin
+                    if (as == 1'b1) begin
                         state <= MEMRW2;
                     end else begin
                         state <= IDLE;
