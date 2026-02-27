@@ -44,7 +44,15 @@
 `define REGISTER8_INTS_ENABLED_POS          1
 `define REGISTER8_TIMER_CONTROL_POS         2
 `define REGISTER8_SPI_DATA_POS              3
-`define REGISTER8_SELECTED_MAXPOS           4
+`define REGISTER8_I2C_ADDRESS_POS           4
+`define REGISTER8_I2C_READ_POS              5
+`define REGISTER8_I2C_WRITE_POS             6
+`define REGISTER8_I2C_CONTROL_POS           7
+`define REGISTER8_PS2A_STATUS_POS           8
+`define REGISTER8_PS2A_SCANCODE_POS         9
+`define REGISTER8_PS2B_STATUS_POS           10
+`define REGISTER8_PS2B_SCANCODE_POS         11
+`define REGISTER8_SELECTED_MAXPOS           12
 
 `define REGISTER8_NULL                      {`REGISTER8_SELECTED_MAXPOS{1'b0}}
 

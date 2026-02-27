@@ -15,7 +15,9 @@ V_SRC = MAXI030Core.v \
 	vector_mapper.v led_register.v waitstate_generator.v interrupts.v timer.v \
 	brom.v \
 	spi/spi_interface.v spi/spi.v \
-	tonegen/tonegen_interface.v tonegen/tonegen.v
+	tonegen/tonegen_interface.v tonegen/tonegen.v \
+	i2c/i2c_interface.v i2c/i2c.v \
+	ps2/ps2_interface.v ps2/ps2.v
 
 ALL_TESTBENCHES = simm_controller_tb
 

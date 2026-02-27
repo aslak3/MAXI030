@@ -83,8 +83,8 @@ module MAXI030Core
         input       n_eth_int,
 
         // I2C
-        output      scl,
-        output      sda,
+        inout       scl,
+        inout       sda,
         input       rtc_square,
         input       temp_alert,
 
@@ -299,14 +299,6 @@ module MAXI030Core
     assign n_cback = 1'b1;
     assign n_br = 1'b1;
     assign n_bgack = 1'b1;
-    // I2C
-    assign scl = 1'b1;
-    assign sda = 1'b1;
-    // PS/2
-    assign ps2a_clock = 1'b1;
-    assign ps2a_data = 1'b1;
-    assign ps2b_clock = 1'b1;
-    assign ps2b_data = 1'b1;
     // QUART
     assign n_quart_iack = 1'b1;
     // IDE
@@ -380,7 +372,10 @@ module MAXI030Core
             ints_enabled :
         register8_selected[`REGISTER8_TIMER_CONTROL_POS] ?
             { 6'b000000, timer_stop_trigger, timer_start_trigger } :
-            8'h00;
+        i2c_data_out_valid ? i2c_data_out :
+        ps2a_data_out_valid ? ps2a_data_out :
+        ps2b_data_out_valid ? ps2b_data_out :
+        8'h00;
 
     wire [15:0] data16 =
         tonegen_data_out_valid ? tonegen_data_out :
@@ -444,6 +439,59 @@ module MAXI030Core
 
         .running(running)
     );
+
+    wire [7:0] i2c_data_out;
+    wire i2c_data_out_valid;
+    i2c_interface i2c_interface
+    (
+        .reset(reset),
+        .clock(clock),
+
+        .read(read),
+        .write(write),
+        .address_cs(register8_selected[`REGISTER8_I2C_ADDRESS_POS]),
+        .read_cs(register8_selected[`REGISTER8_I2C_READ_POS]),
+        .write_cs(register8_selected[`REGISTER8_I2C_WRITE_POS]),
+        .control_cs(register8_selected[`REGISTER8_I2C_CONTROL_POS]),
+        .data_in(data[31:24]),
+        .data_out(i2c_data_out),
+        .data_out_valid(i2c_data_out_valid),
+
+        .scl(scl),
+        .sda(sda)
+    );
+
+    wire [7:0] ps2a_data_out;
+    wire ps2a_data_out_valid;
+    ps2_interface ps2a_interface
+    (
+        .clock(clock),
+
+        .read(read),
+        .status_cs(register8_selected[`REGISTER8_PS2A_STATUS_POS]),
+        .scancode_cs(register8_selected[`REGISTER8_PS2A_SCANCODE_POS]),
+        .data_out(ps2a_data_out),
+        .data_out_valid(ps2a_data_out_valid),
+
+        .ps2_clock(ps2a_clock),
+        .ps2_data(ps2a_data)
+    );
+    wire [7:0] ps2b_data_out;
+    wire ps2b_data_out_valid;
+    ps2_interface ps2b_interface
+    (
+        .clock(clock),
+
+        .read(read),
+        .status_cs(register8_selected[`REGISTER8_PS2B_STATUS_POS]),
+        .scancode_cs(register8_selected[`REGISTER8_PS2B_SCANCODE_POS]),
+        .data_out(ps2b_data_out),
+        .data_out_valid(ps2b_data_out_valid),
+
+        .ps2_clock(ps2b_clock),
+        .ps2_data(ps2b_data)
+    );
+
 
     wire [7:0] ints_enabled;
     ints_enabled_register ints_enabled_register
