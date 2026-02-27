@@ -241,5 +241,7 @@ set_global_assignment -name VERILOG_FILE interrupts.v
 set_global_assignment -name VERILOG_FILE timer.v
 set_global_assignment -name VERILOG_FILE spi/spi.v
 set_global_assignment -name VERILOG_FILE spi/spi_interface.v
+set_global_assignment -name VERILOG_FILE tonegen/tonegen.v
+set_global_assignment -name VERILOG_FILE tonegen/tonegen_interface.v
 set_global_assignment -name VERILOG_FILE brom.v
 set_global_assignment -name VERILOG_FILE MAXI030Core.v

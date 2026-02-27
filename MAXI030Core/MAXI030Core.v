@@ -162,6 +162,7 @@ module MAXI030Core
         .vector_fetched(vector_fetched),
         .addr_upper(addr[31:24]),
         .addr_middle(addr[19:16]),
+        .addr_upper_lower(addr[15:8]),
 
         .device_selected(device_selected),
         .port_width(port_width)
@@ -314,9 +315,9 @@ module MAXI030Core
     assign n_ide_write = ~write;
 
     wire [2:0] ipl;
-    assign n_ipl = 3'b111; // ~ipl;
+    assign n_ipl = ~ipl;
     wire avec;
-    assign n_avec = 1'b1; // ~avec;
+    assign n_avec = ~avec;
     wire timer_irq;
     int_priority_encoder int_priority_encoder
     (
@@ -349,7 +350,7 @@ module MAXI030Core
     register8_decode register8_decode
     (
         .device_register8_selected(device_selected[`DEVICE_REGISTER8_POS]),
-        .addr_lower(addr[7:0]),
+        .addr_lower_lower(addr[7:0]),
 
         .register8_selected(register8_selected)
     );
@@ -358,7 +359,7 @@ module MAXI030Core
     register16_decode register16_decode
     (
         .device_register16_selected(device_selected[`DEVICE_REGISTER16_POS]),
-        .addr_lower(addr[7:0]),
+        .addr_lower_lower(addr[7:0]),
 
         .register16_selected(register16_selected)
     );
@@ -367,7 +368,7 @@ module MAXI030Core
     register32_decode register32_decode
     (
         .device_register32_selected(device_selected[`DEVICE_REGISTER32_POS]),
-        .addr_lower(addr[7:0]),
+        .addr_lower_lower(addr[7:0]),
 
         .register32_selected(register32_selected)
     );
@@ -382,6 +383,7 @@ module MAXI030Core
             8'h00;
 
     wire [15:0] data16 =
+        tonegen_data_out_valid ? tonegen_data_out :
         16'h0000;
 
     wire [31:0] data32 =
@@ -406,6 +408,25 @@ module MAXI030Core
         .data_in(data),
 
         .led(led)
+    );
+
+    wire [15:0] tonegen_data_out;
+    wire tonegen_data_out_valid;
+    tonegen_interface tonegen_interface
+    (
+        .reset(reset),
+        .clock(clock),
+
+        .read(read),
+        .write(write),
+        .duration_cs(register16_selected[`REGISTER16_TONEGEN_DURATION_POS]),
+        .period_cs(register16_selected[`REGISTER16_TONEGEN_PERIOD_POS]),
+        .status_cs(register16_selected[`REGISTER16_TONEGEN_STATUS_POS]),
+        .data_in(data[31:16]),
+        .data_out(tonegen_data_out),
+        .data_out_valid(tonegen_data_out_valid),
+
+        .buzzer(buzzer)
     );
 
     wire running;
@@ -472,7 +493,5 @@ module MAXI030Core
         .sys_clear(sys_clear)
     );
 
-    assign user[2] = device_selected[`DEVICE_SIMM_POS];
-    assign user[3] = device_selected[`DEVICE_QUART_POS];
-    assign user[4] = 1'b0;
+    assign user[2] = timer_irq;
 endmodule

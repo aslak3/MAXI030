@@ -31,6 +31,7 @@ module device_decode
         input       vector_fetched,
         input       [7:0] addr_upper,
         input       [3:0] addr_middle,
+        input       [7:0] addr_upper_lower,
 
         output reg  [`DEVICE_SELECTED_MAXPOS-1:0] device_selected,
         output reg  [`PORT_WIDTH_WIDTH-1:0] port_width
@@ -42,7 +43,6 @@ module device_decode
                 port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_ROM_POS;
             end else begin
                 if (addr_upper[7:6] == 2'b00) begin
-                    // port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_SLOT0_POS;
                     port_width = `PORT_WIDTH_LONG; device_selected = 1 << `DEVICE_SIMM_POS;
                 end else if (addr_upper == 8'h40) begin
                     port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_SLOT0_POS;
@@ -54,10 +54,15 @@ module device_decode
                     port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_SLOT3_POS;
                 end else if (addr_upper == 8'h44) begin
                     if (addr_middle == 4'h0) begin
-                        port_width = `PORT_WIDTH_BYTE;
-                        device_selected = 1 << `DEVICE_REGISTER8_POS;
-                    end else if (addr_middle == 4'h0) begin
-                        port_width = `PORT_WIDTH_BYTE; device_selected = 1 << `DEVICE_REGISTER8_POS;
+                        if (addr_upper_lower == 8'h00) begin
+                            port_width = `PORT_WIDTH_BYTE; device_selected = 1 << `DEVICE_REGISTER8_POS;
+                        end else if (addr_upper_lower == 8'h01) begin
+                            port_width = `PORT_WIDTH_WORD; device_selected = 1 << `DEVICE_REGISTER16_POS;
+                        end else if (addr_upper_lower == 8'h02) begin
+                            port_width = `PORT_WIDTH_LONG; device_selected = 1 << `DEVICE_REGISTER32_POS;
+                        end else begin
+                            port_width = `PORT_WIDTH_NULL; device_selected = `DEVICE_NULL;
+                        end
                     end else if (addr_middle == 4'h1) begin
                         port_width = `PORT_WIDTH_BYTE; device_selected = 1 << `DEVICE_QUART_POS;
                     end else if (addr_middle == 4'h2) begin
@@ -88,14 +93,14 @@ endmodule
 module register8_decode
     (
         input       device_register8_selected,
-        input       [7:0] addr_lower,
+        input       [7:0] addr_lower_lower,
 
         output reg  [`REGISTER8_SELECTED_MAXPOS-1:0] register8_selected
     );
 
     always @ (*) begin
         if (device_register8_selected) begin
-            case (addr_lower)
+            case (addr_lower_lower)
                 8'h00:      register8_selected = 1 << `REGISTER8_LED_POS;
                 8'h01:      register8_selected = 1 << `REGISTER8_INTS_ENABLED_POS;
                 8'h02:      register8_selected = 1 << `REGISTER8_TIMER_CONTROL_POS;
@@ -111,15 +116,18 @@ endmodule
 module register16_decode
     (
         input       device_register16_selected,
-        input       [7:0] addr_lower,
+        input       [7:0] addr_lower_lower,
 
         output reg  [`REGISTER16_SELECTED_MAXPOS-1:0] register16_selected
     );
 
     always @ (*) begin
         if (device_register16_selected) begin
-            case (addr_lower)
-                default:    register16_selected = `REGISTER16_NULL;
+            case (addr_lower_lower)
+                8'h00:      register16_selected = 1 << `REGISTER16_TONEGEN_DURATION_POS;
+                8'h02:      register16_selected = 1 << `REGISTER16_TONEGEN_PERIOD_POS;
+                8'h04:      register16_selected = 1 << `REGISTER16_TONEGEN_STATUS_POS;
+                default:    register16_selected =      `REGISTER16_NULL;
             endcase
         end else begin
             register16_selected = `REGISTER16_NULL;
@@ -130,14 +138,14 @@ endmodule
 module register32_decode
     (
         input       device_register32_selected,
-        input       [7:0] addr_lower,
+        input       [7:0] addr_lower_lower,
 
         output reg  [`REGISTER32_SELECTED_MAXPOS-1:0] register32_selected
     );
 
     always @ (*) begin
         if (device_register32_selected) begin
-            case (addr_lower)
+            case (addr_lower_lower)
                 8'h00:      register32_selected = 1 << `REGISTER32_TIMER_START_VALUE_POS;
                 8'h04:      register32_selected = 1 << `REGISTER32_TIMER_CURRENT_VALUE_POS;
                 default:    register32_selected =      `REGISTER32_NULL;

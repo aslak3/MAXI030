@@ -23,6 +23,7 @@ module timer_registers
         end else begin
             start_trigger <= 1'b0;
             stop_trigger <= 1'b0;
+
             if (write) begin
                 if (start_value_cs) begin
                     start_value <= data_in;
