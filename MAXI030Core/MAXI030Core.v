@@ -366,12 +366,11 @@ module MAXI030Core
     );
 
     wire [7:0] data8 =
-        register8_selected[`REGISTER8_LED_POS] ?
-           { 7'b0000000, led } :
         register8_selected[`REGISTER8_INTS_ENABLED_POS] ?
             ints_enabled :
         register8_selected[`REGISTER8_TIMER_CONTROL_POS] ?
             { 6'b000000, timer_stop_trigger, timer_start_trigger } :
+        led_data_out_valid ? led_data_out :
         i2c_data_out_valid ? i2c_data_out :
         ps2a_data_out_valid ? ps2a_data_out :
         ps2b_data_out_valid ? ps2b_data_out :
@@ -393,14 +392,19 @@ module MAXI030Core
         read & device_selected[`DEVICE_BROM_POS] ? brom_dout :
         32'hzzzzzzzz;
 
-    led_register led_register
+    wire [7:0] led_data_out;
+    wire led_data_out_valid;
+    led_interface led_interface
     (
         .reset(reset),
         .clock(clock),
 
+        .read(read),
         .write(write),
         .cs(register8_selected[`REGISTER8_LED_POS]),
-        .data_in(data),
+        .data_in(data[31:24]),
+        .data_out(led_data_out),
+        .data_out_valid(led_data_out_valid),
 
         .led(led)
     );
