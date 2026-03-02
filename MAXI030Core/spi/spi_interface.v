@@ -6,18 +6,17 @@ module spi_interface
         input           clock,
 
         input           write,
-
-        input           data_in_cs,
-        input [31:0]    data_in,
+        input           cs,
+        input [7:0]     data_in,
 
         output          sclk,
-        output          mosi,
-
-        output          running
+        output          mosi
     );
 
-    reg         trigger;
-    reg [7:0]   data;
+    reg trigger;
+    reg [7:0] data;
+    // TODO: Needs a status register for this
+    wire running;
 
     always @ (posedge clock) begin
         if (reset) begin
@@ -26,8 +25,8 @@ module spi_interface
         end else begin
             trigger <= 1'b0;
             if (write) begin
-                if (data_in_cs) begin
-                    data <= data_in[31:24];
+                if (cs) begin
+                    data <= data_in;
                     trigger <= 1'b1;
                 end
             end

@@ -2,11 +2,11 @@
 
 module brom
     (
-        input clock,
+        input       clock,
 
-        input [8:0] addr,
+        input       [8:0] addr,
 
-        output reg [31:0] dout
+        output reg  [31:0] dout
     );
 
     reg [31:0] mem [0:511];

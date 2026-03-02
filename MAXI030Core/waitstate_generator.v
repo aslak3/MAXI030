@@ -1,11 +1,11 @@
 module waitstate_generator #(
-        parameter DELAY = 4'h1
+        parameter   DELAY = 4'h1
     )
     (
-        input clock,
-        input cs,
+        input       clock,
+        input       cs,
 
-        output waitstate
+        output      waitstate
     );
 
     reg [3:0] counter;

@@ -1,8 +1,8 @@
 module sys_clear_generator
     (
-        input clock,
+        input       clock,
 
-        output sys_clear
+        output      sys_clear
     );
 
     reg [19:0] counter = 20'h00000;

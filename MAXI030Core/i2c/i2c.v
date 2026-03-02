@@ -2,21 +2,21 @@
 
 module i2c
 	(
-        input clock,					// Master clock
-        input reset,					// Master reset
+        input 		reset,				// Master reset
+        input 		clock,				// Master clock
 
-        input trigger,					// Continue on after pause
-        input restart,					// Generates a new START
-        input last_byte,				// This is the last byte to read/write
-        input [6:0] address,		    // Slave address
-        input read_write,				// 0=write, 1=read
-        input [7:0] write_data,         // Data to write
-        output reg [7:0] read_data,     // Data we have read
-        output reg ack_error,			// 0=ACK, 1=NAK
-        output busy,					// Controller is processing
+        input 		trigger,			// Continue on after pause
+        input 		restart,			// Generates a new START
+        input 		last_byte,			// This is the last byte to read/write
+        input 		[6:0] address,		// Slave address
+        input 		read_write,			// 0=write, 1=read
+        input 		[7:0] write_data,   // Data to write
+        output reg 	[7:0] read_data,    // Data we have read
+        output reg 	ack_error,			// 0=ACK, 1=NAK
+        output 		busy,				// Controller is processing
 
-        inout scl,					    // Tri-state
-        inout sda					    // Ditto
+        inout 		scl,				// Tri-state
+        inout 		sda					// Ditto
     );
 
     localparam  START1 = 0,

@@ -8,15 +8,14 @@ module spi (
     input [7:0]     out_byte,   // Byte to shift out
 
     output          sclk,       // SPI clock line
-    output          mosi,        // Master Out Slave In
+    output          mosi,       // Master Out Slave In
 
-    output reg      running
+    output reg      running     // Used to pass back status
 );
 
-    reg  [7:0] out_state;   // Byte currently being shifted out
-    reg  [2:0] counter;     // 3‑bit bit counter (0‑7)
-    // reg        running;     // Transfer in progress flag
-    reg        tick;        // In/Out half‑cycle toggle
+    reg [7:0] out_state;    // Byte currently being shifted out
+    reg [2:0] counter;      // 3‑bit bit counter (0‑7)
+    reg tick;               // In/Out half‑cycle toggle
 
     always @ (posedge clock) begin
         if (reset) begin

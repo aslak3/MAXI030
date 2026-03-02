@@ -1,13 +1,14 @@
 module tonegen
     (
-        input reset,
-        input clock,
+        input       reset,
+        input       clock,
 
-        input [15:0] duration,
-        input [15:0] period,
-        input tone_start,
-        output reg buzzer,
-        output playing
+        input       [15:0] duration,
+        input       [15:0] period,
+        input       tone_start,
+
+        output reg  buzzer,
+        output      playing
     );
 
     reg [15+16:0] duration_counter = 32'h0;

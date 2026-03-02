@@ -2,23 +2,23 @@
 
 module simm_controller
     (
-        input reset,
-        input clock,
+        input       reset,
+        input       clock,
 
-        input cs,
-        input as,
-        input ds,
-        input rn_w,
-        input bank_addr,
-        input slot_addr,
-        input [3:0] byte_selects,
+        input       cs,
+        input       as,
+        input       ds,
+        input       rn_w,
+        input       bank_addr,
+        input       slot_addr,
+        input       [3:0] byte_selects,
 
-        output reg write,
-        output reg [3:0] ras0,
-        output reg [3:0] ras1,
-        output reg [3:0] cas,
-        output reg waitstate,
-        output reg mux_select
+        output reg  write,
+        output reg  [3:0] ras0,
+        output reg  [3:0] ras1,
+        output reg  [3:0] cas,
+        output reg  waitstate,
+        output reg  mux_select
     );
 
     // Define the states

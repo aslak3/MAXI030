@@ -2,16 +2,16 @@
 
 module ps2_interface
     (
-        input clock,
+        input       clock,
 
-        input read,
-        input status_cs,
-        input scancode_cs,
-        output reg [7:0] data_out,
-        output data_out_valid,
+        input       read,
+        input       status_cs,
+        input       scancode_cs,
+        output reg  [7:0] data_out,
+        output      data_out_valid,
 
-        inout ps2_clock,
-        inout ps2_data
+        inout       ps2_clock,
+        inout       ps2_data
     );
 
     always @ (*) begin

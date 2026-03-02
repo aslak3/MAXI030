@@ -2,19 +2,19 @@
 
 module tonegen_interface
     (
-        input reset,
-        input clock,
+        input       reset,
+        input       clock,
 
-        input read,
-        input write,
-        input duration_cs,
-        input period_cs,
-        input status_cs,
-        input [15:0] data_in,
-        output reg [15:0] data_out,
-        output data_out_valid,
+        input       read,
+        input       write,
+        input       duration_cs,
+        input       period_cs,
+        input       status_cs,
+        input       [15:0] data_in,
+        output reg  [15:0] data_out,
+        output      data_out_valid,
 
-        output buzzer
+        output      buzzer
     );
 
     reg [15:0] duration = 16'h0;
@@ -48,7 +48,7 @@ module tonegen_interface
         end else if (period_cs) begin
             data_out = period;
         end else if (status_cs) begin
-            data_out = { playing, 15'b0 };
+            data_out = { 15'b0, playing };
         end else begin
             data_out = { 16'h0 };
         end

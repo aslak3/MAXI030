@@ -32,6 +32,7 @@ module led_interface
         end else begin
             if (write) begin
                 if (cs) begin
+                    // Sets the output directly, a trivial module would just be silly.
                     led <= data_in[0];
                 end
             end

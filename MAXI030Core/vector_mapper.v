@@ -2,11 +2,11 @@
 
 module vector_mapper
     (
-        input clock,
-        input reset,
+        input       clock,
+        input       reset,
 
-        input as,
-        output vector_fetched
+        input       as,
+        output      vector_fetched
     );
 
     reg last_as;

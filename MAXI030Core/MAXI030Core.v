@@ -122,9 +122,10 @@ module MAXI030Core
     assign n_read = ~read;
     assign n_write = ~write;
     wire vector_fetched;
-    vector_mapper vector_mapper (
-        .clock(clock),
+    vector_mapper vector_mapper
+    (
         .reset(reset),
+        .clock(clock),
 
         .as(as),
         .vector_fetched(vector_fetched)
@@ -132,7 +133,8 @@ module MAXI030Core
 
     wire upper, lower;
     wire upper_upper, upper_mid, lower_mid, lower_lower;
-    byte_select_generator byte_select_generator (
+    byte_select_generator byte_select_generator
+    (
         .a0(addr[0]), .a1(addr[1]),
         .rn_w(rn_w),
         .siz0(siz[0]), .siz1(siz[1]),
@@ -246,7 +248,6 @@ module MAXI030Core
     // registers
     assign n_berr = function_selected[`FUNCTION_NORMAL_POS] & (
         (device_selected == `DEVICE_NULL) |
-        // TODO fix bootloader or implement buzzer, etc
         (device_selected[`DEVICE_REGISTER8_POS] & register8_selected == `REGISTER8_NULL) |
         (device_selected[`DEVICE_REGISTER16_POS] & register16_selected == `REGISTER16_NULL) |
         (device_selected[`DEVICE_REGISTER32_POS] & register32_selected == `REGISTER32_NULL)
@@ -393,20 +394,17 @@ module MAXI030Core
         .buzzer(buzzer)
     );
 
-    wire running;
     spi_interface spi_interface
     (
         .reset(reset),
         .clock(clock),
 
         .write(write),
-        .data_in_cs(register8_selected[`REGISTER8_SPI_DATA_POS]),
-        .data_in(data),
+        .cs(register8_selected[`REGISTER8_SPI_DATA_POS]),
+        .data_in(data[31:24]),
 
         .sclk(user[0]),
-        .mosi(user[1]),
-
-        .running(running)
+        .mosi(user[1])
     );
 
     wire [7:0] i2c_data_out;
