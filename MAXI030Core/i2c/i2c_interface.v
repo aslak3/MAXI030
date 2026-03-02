@@ -57,7 +57,7 @@ module i2c_interface
                 i2c_write_data <= data_in;
                 i2c_trigger <= 1'b1;
             end else if (control_cs) begin
-                i2c_last_byte <= data_in[7];
+                i2c_last_byte <= data_in[0];
             end
         end
     end
