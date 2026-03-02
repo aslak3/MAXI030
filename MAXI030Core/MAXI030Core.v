@@ -324,20 +324,6 @@ module MAXI030Core
         .avec(avec)
     );
 
-    wire [31:0] timer_current_value;
-    timer timer
-    (
-        .reset(reset),
-        .clock(clock),
-
-        .start_value(timer_start_value),
-        .start_trigger(timer_start_trigger),
-        .stop_trigger(timer_stop_trigger),
-
-        .irq(timer_irq),
-        .current_value(timer_current_value)
-    );
-
     wire [`REGISTER8_SELECTED_MAXPOS-1:0] register8_selected;
     register8_decode register8_decode
     (
@@ -368,8 +354,6 @@ module MAXI030Core
     wire [7:0] data8 =
         register8_selected[`REGISTER8_INTS_ENABLED_POS] ?
             ints_enabled :
-        register8_selected[`REGISTER8_TIMER_CONTROL_POS] ?
-            { 6'b000000, timer_stop_trigger, timer_start_trigger } :
         led_data_out_valid ? led_data_out :
         i2c_data_out_valid ? i2c_data_out :
         ps2a_data_out_valid ? ps2a_data_out :
@@ -381,15 +365,14 @@ module MAXI030Core
         16'h0000;
 
     wire [31:0] data32 =
-        register32_selected[`REGISTER32_TIMER_START_VALUE_POS] ? timer_start_value :
-        register32_selected[`REGISTER32_TIMER_CURRENT_VALUE_POS] ? timer_current_value :
+        timer_data_out_valid ? timer_data_out :
         32'h00000000;
 
     assign data =
         read & device_selected[`DEVICE_REGISTER8_POS] ?     { data8, 24'h000000 } :
         read & device_selected[`DEVICE_REGISTER16_POS] ?    { data16, 16'h0000 } :
         read & device_selected[`DEVICE_REGISTER32_POS] ?    data32 :
-        read & device_selected[`DEVICE_BROM_POS] ? brom_dout :
+        read & device_selected[`DEVICE_BROM_POS] ?          brom_dout :
         32'hzzzzzzzz;
 
     wire [7:0] led_data_out;
@@ -510,22 +493,23 @@ module MAXI030Core
         .ints_enabled(ints_enabled)
     );
 
-    wire [31:0] timer_start_value;
-    wire timer_start_trigger;
-    wire timer_stop_trigger;
-    timer_registers timer_registers
+    wire [31:0] timer_data_out;
+    wire timer_data_out_valid;
+    timer_interface timer_interface
     (
         .reset(reset),
         .clock(clock),
 
+        .read(read),
         .write(write),
         .start_value_cs(register32_selected[`REGISTER32_TIMER_START_VALUE_POS]),
-        .control_cs(register8_selected[`REGISTER8_TIMER_CONTROL_POS]),
+        .current_value_cs(register32_selected[`REGISTER32_TIMER_CURRENT_VALUE_POS]),
+        .control_cs(register32_selected[`REGISTER32_TIMER_CONTROL_POS]),
         .data_in(data),
+        .data_out(timer_data_out),
+        .data_out_valid(timer_data_out_valid),
 
-        .start_value(timer_start_value),
-        .start_trigger(timer_start_trigger),
-        .stop_trigger(timer_stop_trigger)
+        .irq(timer_irq)
     );
 
     wire [31:0] brom_dout;

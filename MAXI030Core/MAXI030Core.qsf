@@ -237,7 +237,8 @@ set_global_assignment -name VERILOG_FILE addr_decode.v
 set_global_assignment -name VERILOG_FILE simm_controller.v
 set_global_assignment -name VERILOG_FILE waitstate_generator.v
 set_global_assignment -name VERILOG_FILE interrupts.v
-set_global_assignment -name VERILOG_FILE timer.v
+set_global_assignment -name VERILOG_FILE timer/timer_interface.v
+set_global_assignment -name VERILOG_FILE timer/timer.v
 set_global_assignment -name VERILOG_FILE led/led_interface.v
 set_global_assignment -name VERILOG_FILE spi/spi.v
 set_global_assignment -name VERILOG_FILE spi/spi_interface.v

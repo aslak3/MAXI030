@@ -103,16 +103,15 @@ module register8_decode
             case (addr_lower_lower)
                 8'h00:      register8_selected = 1 << `REGISTER8_LED_POS;
                 8'h01:      register8_selected = 1 << `REGISTER8_INTS_ENABLED_POS;
-                8'h02:      register8_selected = 1 << `REGISTER8_TIMER_CONTROL_POS;
+                8'h02:      register8_selected = 1 << `REGISTER8_I2C_ADDRESS_POS;
+                8'h03:      register8_selected = 1 << `REGISTER8_I2C_READ_POS;
+                8'h04:      register8_selected = 1 << `REGISTER8_I2C_WRITE_POS;
+                8'h05:      register8_selected = 1 << `REGISTER8_I2C_CONTROL_POS;
+                8'h06:      register8_selected = 1 << `REGISTER8_PS2A_STATUS_POS;
+                8'h07:      register8_selected = 1 << `REGISTER8_PS2A_SCANCODE_POS;
+                8'h08:      register8_selected = 1 << `REGISTER8_PS2B_STATUS_POS;
+                8'h09:      register8_selected = 1 << `REGISTER8_PS2B_SCANCODE_POS;
                 8'h0c:      register8_selected = 1 << `REGISTER8_SPI_DATA_POS; // UGH
-                8'h03:      register8_selected = 1 << `REGISTER8_I2C_ADDRESS_POS;
-                8'h04:      register8_selected = 1 << `REGISTER8_I2C_READ_POS;
-                8'h05:      register8_selected = 1 << `REGISTER8_I2C_WRITE_POS;
-                8'h06:      register8_selected = 1 << `REGISTER8_I2C_CONTROL_POS;
-                8'h07:      register8_selected = 1 << `REGISTER8_PS2A_STATUS_POS;
-                8'h08:      register8_selected = 1 << `REGISTER8_PS2A_SCANCODE_POS;
-                8'h09:      register8_selected = 1 << `REGISTER8_PS2B_STATUS_POS;
-                8'h0a:      register8_selected = 1 << `REGISTER8_PS2B_SCANCODE_POS;
                 default:    register8_selected =      `REGISTER8_NULL;
             endcase
         end else begin
@@ -156,6 +155,7 @@ module register32_decode
             case (addr_lower_lower)
                 8'h00:      register32_selected = 1 << `REGISTER32_TIMER_START_VALUE_POS;
                 8'h04:      register32_selected = 1 << `REGISTER32_TIMER_CURRENT_VALUE_POS;
+                8'h08:      register32_selected = 1 << `REGISTER32_TIMER_CONTROL_POS;
                 default:    register32_selected =      `REGISTER32_NULL;
             endcase
         end else begin
