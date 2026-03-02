@@ -12,9 +12,10 @@ VVP = vvp
 
 V_SRC = MAXI030Core.v \
 	addr_decode.v sys_clear_generator.v byte_select_generator.v simm_controller.v \
-	vector_mapper.v waitstate_generator.v interrupts.v \
+	vector_mapper.v waitstate_generator.v \
 	brom.v \
 	timer/timer_interface.v timer/timer.v \
+	interrupts/interrupts_interface.v interrupts/interrupts.v \
 	led/led_interface.v \
 	spi/spi_interface.v spi/spi.v \
 	tonegen/tonegen_interface.v tonegen/tonegen.v \

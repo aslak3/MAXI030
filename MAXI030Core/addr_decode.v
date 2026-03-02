@@ -102,15 +102,14 @@ module register8_decode
         if (device_register8_selected) begin
             case (addr_lower_lower)
                 8'h00:      register8_selected = 1 << `REGISTER8_LED_POS;
-                8'h01:      register8_selected = 1 << `REGISTER8_INTS_ENABLED_POS;
-                8'h02:      register8_selected = 1 << `REGISTER8_I2C_ADDRESS_POS;
-                8'h03:      register8_selected = 1 << `REGISTER8_I2C_READ_POS;
-                8'h04:      register8_selected = 1 << `REGISTER8_I2C_WRITE_POS;
-                8'h05:      register8_selected = 1 << `REGISTER8_I2C_CONTROL_POS;
-                8'h06:      register8_selected = 1 << `REGISTER8_PS2A_STATUS_POS;
-                8'h07:      register8_selected = 1 << `REGISTER8_PS2A_SCANCODE_POS;
-                8'h08:      register8_selected = 1 << `REGISTER8_PS2B_STATUS_POS;
-                8'h09:      register8_selected = 1 << `REGISTER8_PS2B_SCANCODE_POS;
+                8'h01:      register8_selected = 1 << `REGISTER8_I2C_ADDRESS_POS;
+                8'h02:      register8_selected = 1 << `REGISTER8_I2C_READ_POS;
+                8'h03:      register8_selected = 1 << `REGISTER8_I2C_WRITE_POS;
+                8'h04:      register8_selected = 1 << `REGISTER8_I2C_CONTROL_POS;
+                8'h05:      register8_selected = 1 << `REGISTER8_PS2A_STATUS_POS;
+                8'h06:      register8_selected = 1 << `REGISTER8_PS2A_SCANCODE_POS;
+                8'h07:      register8_selected = 1 << `REGISTER8_PS2B_STATUS_POS;
+                8'h08:      register8_selected = 1 << `REGISTER8_PS2B_SCANCODE_POS;
                 8'h0c:      register8_selected = 1 << `REGISTER8_SPI_DATA_POS; // UGH
                 default:    register8_selected =      `REGISTER8_NULL;
             endcase
@@ -134,6 +133,7 @@ module register16_decode
                 8'h00:      register16_selected = 1 << `REGISTER16_TONEGEN_DURATION_POS;
                 8'h02:      register16_selected = 1 << `REGISTER16_TONEGEN_PERIOD_POS;
                 8'h04:      register16_selected = 1 << `REGISTER16_TONEGEN_STATUS_POS;
+                8'h06:      register16_selected = 1 << `REGISTER16_INTS_ENABLED_POS;
                 default:    register16_selected =      `REGISTER16_NULL;
             endcase
         end else begin

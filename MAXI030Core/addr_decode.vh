@@ -41,17 +41,16 @@
 
 // REGISTERS 8 bit
 `define REGISTER8_LED_POS                   0
-`define REGISTER8_INTS_ENABLED_POS          1
-`define REGISTER8_SPI_DATA_POS              2
-`define REGISTER8_I2C_ADDRESS_POS           3
-`define REGISTER8_I2C_READ_POS              4
-`define REGISTER8_I2C_WRITE_POS             5
-`define REGISTER8_I2C_CONTROL_POS           6
-`define REGISTER8_PS2A_STATUS_POS           7
-`define REGISTER8_PS2A_SCANCODE_POS         8
-`define REGISTER8_PS2B_STATUS_POS           9
-`define REGISTER8_PS2B_SCANCODE_POS         10
-`define REGISTER8_SELECTED_MAXPOS           11
+`define REGISTER8_SPI_DATA_POS              1
+`define REGISTER8_I2C_ADDRESS_POS           2
+`define REGISTER8_I2C_READ_POS              3
+`define REGISTER8_I2C_WRITE_POS             4
+`define REGISTER8_I2C_CONTROL_POS           5
+`define REGISTER8_PS2A_STATUS_POS           6
+`define REGISTER8_PS2A_SCANCODE_POS         7
+`define REGISTER8_PS2B_STATUS_POS           8
+`define REGISTER8_PS2B_SCANCODE_POS         9
+`define REGISTER8_SELECTED_MAXPOS           10
 
 `define REGISTER8_NULL                      {`REGISTER8_SELECTED_MAXPOS{1'b0}}
 
@@ -59,7 +58,8 @@
 `define REGISTER16_TONEGEN_DURATION_POS     0
 `define REGISTER16_TONEGEN_PERIOD_POS       1
 `define REGISTER16_TONEGEN_STATUS_POS       2
-`define REGISTER16_SELECTED_MAXPOS          3
+`define REGISTER16_INTS_ENABLED_POS         3
+`define REGISTER16_SELECTED_MAXPOS          4
 
 `define REGISTER16_NULL                     {`REGISTER16_SELECTED_MAXPOS{1'b0}}
 

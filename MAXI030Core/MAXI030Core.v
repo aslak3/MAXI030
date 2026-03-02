@@ -1,4 +1,5 @@
 `include "addr_decode.vh"
+`include "interrupts/interrupts.vh"
 
 module MAXI030Core
     (
@@ -306,24 +307,6 @@ module MAXI030Core
     assign n_ide_read = ~read;
     assign n_ide_write = ~write;
 
-    wire [2:0] ipl;
-    assign n_ipl = ~ipl;
-    wire avec;
-    assign n_avec = ~avec;
-    wire timer_irq;
-    int_priority_encoder int_priority_encoder
-    (
-        .ps2_irq(1'b0),
-        .eth_irq(~n_eth_int),
-        .ide_irq(~n_ide_irq),
-        .quart_irq(~n_quart_irq),
-        .timer_irq(timer_irq),
-        .ints_enabled(ints_enabled),
-
-        .ipl(ipl),
-        .avec(avec)
-    );
-
     wire [`REGISTER8_SELECTED_MAXPOS-1:0] register8_selected;
     register8_decode register8_decode
     (
@@ -352,8 +335,6 @@ module MAXI030Core
     );
 
     wire [7:0] data8 =
-        register8_selected[`REGISTER8_INTS_ENABLED_POS] ?
-            ints_enabled :
         led_data_out_valid ? led_data_out :
         i2c_data_out_valid ? i2c_data_out :
         ps2a_data_out_valid ? ps2a_data_out :
@@ -362,6 +343,7 @@ module MAXI030Core
 
     wire [15:0] data16 =
         tonegen_data_out_valid ? tonegen_data_out :
+        interrupt_data_out_valid ? interrupt_data_out :
         16'h0000;
 
     wire [31:0] data32 =
@@ -479,22 +461,38 @@ module MAXI030Core
         .ps2_data(ps2b_data)
     );
 
-
-    wire [7:0] ints_enabled;
-    ints_enabled_register ints_enabled_register
+    wire [15:0] interrupt_data_out;
+    wire interrupt_data_out_valid;
+    wire [`INT_MAXPOS-1:0] irqs_active;
+    assign irqs_active[`INT_TIMER_POS] = timer_irq;
+    assign irqs_active[`INT_QUART_POS] = ~n_quart_irq;
+    assign irqs_active[`INT_IDE_POS] = ~n_ide_irq;
+    assign irqs_active[`INT_ETH_POS] = ~n_eth_int;
+    assign irqs_active[`INT_PS2_POS] = 1'b0;
+    wire [2:0] ipl;
+    assign n_ipl = ~ipl;
+    wire avec;
+    assign n_avec = ~avec;
+    interrupts_interface interrupts_interface
     (
         .reset(reset),
         .clock(clock),
 
+        .read(read),
         .write(write),
-        .cs(register8_selected[`REGISTER8_INTS_ENABLED_POS]),
-        .data_in(data),
+        .cs(register16_selected[`REGISTER16_INTS_ENABLED_POS]),
+        .data_in(data[31:16]),
+        .data_out(interrupt_data_out),
+        .data_out_valid(interrupt_data_out_valid),
 
-        .ints_enabled(ints_enabled)
+        .irqs_active(irqs_active),
+        .ipl(ipl),
+        .avec(avec)
     );
 
     wire [31:0] timer_data_out;
     wire timer_data_out_valid;
+    wire timer_irq;
     timer_interface timer_interface
     (
         .reset(reset),
