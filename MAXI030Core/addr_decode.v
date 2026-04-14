@@ -156,6 +156,10 @@ module register32_decode
                 8'h00:      register32_selected = 1 << `REGISTER32_TIMER_START_VALUE_POS;
                 8'h04:      register32_selected = 1 << `REGISTER32_TIMER_CURRENT_VALUE_POS;
                 8'h08:      register32_selected = 1 << `REGISTER32_TIMER_CONTROL_POS;
+                8'h0c:      register32_selected = 1 << `REGISTER32_DMAC_SRC_ADDR_POS;
+                8'h10:      register32_selected = 1 << `REGISTER32_DMAC_DST_ADDR_POS;
+                8'h14:      register32_selected = 1 << `REGISTER32_DMAC_LENGTH_POS;
+                8'h18:      register32_selected = 1 << `REGISTER32_DMAC_CONTROL_POS;
                 default:    register32_selected =      `REGISTER32_NULL;
             endcase
         end else begin

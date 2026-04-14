@@ -1,10 +1,15 @@
 // PORT WIDTHS
 //
 `define PORT_WIDTH_WIDTH                2
-`define PORT_WIDTH_LONG                 2'b00
-`define PORT_WIDTH_WORD                 2'b01
-`define PORT_WIDTH_BYTE                 2'b10
-`define PORT_WIDTH_NULL                 2'b11
+`define PORT_WIDTH_LONG                 2'b11
+`define PORT_WIDTH_WORD                 2'b10
+`define PORT_WIDTH_BYTE                 2'b01
+`define PORT_WIDTH_NULL                 2'b00
+
+`define SIZE_ONE                        2'b01
+`define SIZE_TWO                        2'b10
+`define SIZE_THREE                      2'b11
+`define SIZE_FOUR                       2'b00
 
 // FUNCTIONS
 //
@@ -66,7 +71,11 @@
 // REGISTERS 32 bit
 `define REGISTER32_TIMER_START_VALUE_POS    0
 `define REGISTER32_TIMER_CURRENT_VALUE_POS  1
-`define REGISTER32_TIMER_CONTROL_POS         2
-`define REGISTER32_SELECTED_MAXPOS          3
+`define REGISTER32_TIMER_CONTROL_POS        2
+`define REGISTER32_DMAC_SRC_ADDR_POS        3
+`define REGISTER32_DMAC_DST_ADDR_POS        4
+`define REGISTER32_DMAC_LENGTH_POS          5
+`define REGISTER32_DMAC_CONTROL_POS         6
+`define REGISTER32_SELECTED_MAXPOS          7
 
 `define REGISTER32_NULL                     {`REGISTER32_SELECTED_MAXPOS{1'b0}}

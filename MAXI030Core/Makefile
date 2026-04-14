@@ -1,6 +1,6 @@
 # An even more crude makefile...
 
-TARGET_HOST=192.168.0.5
+TARGET_HOST=10.52.0.5
 SSH=ssh $(TARGET_HOST)
 
 DIR=MAXI030Core
@@ -16,6 +16,7 @@ V_SRC = MAXI030Core.v \
 	brom.v \
 	timer/timer_interface.v timer/timer.v \
 	interrupts/interrupts_interface.v interrupts/interrupts.v \
+	dmac/dmac_interface.v dmac/dmac.v \
 	led/led_interface.v \
 	spi/spi_interface.v spi/spi.v \
 	tonegen/tonegen_interface.v tonegen/tonegen.v \

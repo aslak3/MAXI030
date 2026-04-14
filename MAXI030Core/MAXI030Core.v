@@ -13,15 +13,17 @@ module MAXI030Core
 
         // Memory bus
         inout       [31:0] data,
-        input       rn_w,
-        input       [31:0] addr,
-        input       n_as,
-        input       n_ds,
-        input       [1:0] siz,
-        input       [2:0] fc,
+        inout       rn_w,
+        inout       [31:0] addr,
+        inout       n_as,
+        inout       n_ds,
+        inout       [1:0] siz,
+        inout       [2:0] fc,
         output      [1:0] n_dsack,
+        // Not used by DMAC
         input       n_rmc,
         output      n_sterm,
+        // Memory bus derived
         output      n_read,
         output      n_write,
 
@@ -116,8 +118,23 @@ module MAXI030Core
     wire ds = ~n_ds;
     wire fpu_sense = ~n_fpu_sense;
 
-    wire read = ds & rn_w;
-    wire write = ds & ~rn_w;
+    // The internal memory bus
+    wire local_rn_w = bgack ? dmac_rn_w : rn_w;
+    assign rn_w = bgack ? dmac_rn_w : 1'bz;
+    wire [31:0] local_addr = bgack ? dmac_addr : addr;
+    assign addr = bgack ? dmac_addr : 32'hzzzzzzzz;
+    wire local_as = bgack ? dmac_as : as;
+    assign n_as = bgack ? ~dmac_as : 1'bz;
+    wire local_ds = bgack ? dmac_ds : ~n_ds;
+    assign n_ds = bgack ? ~dmac_ds : 1'bz;
+    wire [1:0] local_siz = bgack ? dmac_siz : siz;
+    assign siz = bgack ? dmac_siz : 2'bzz;
+    wire [2:0] local_fc = bgack ? dmac_fc : fc;
+    assign fc = bgack ? dmac_fc : 3'bzzz;
+    wire [31:0] local_data_out = bgack & ~dmac_rn_w ? dmac_data_out : data;
+
+    wire read = local_ds & local_rn_w;
+    wire write = local_ds & ~local_rn_w;
 
     assign n_read = ~read;
     assign n_write = ~write;
@@ -127,7 +144,7 @@ module MAXI030Core
         .reset(reset),
         .clock(clock),
 
-        .as(as),
+        .as(local_as),
         .vector_fetched(vector_fetched)
     );
 
@@ -135,9 +152,9 @@ module MAXI030Core
     wire upper_upper, upper_mid, lower_mid, lower_lower;
     byte_select_generator byte_select_generator
     (
-        .a0(addr[0]), .a1(addr[1]),
-        .rn_w(rn_w),
-        .siz0(siz[0]), .siz1(siz[1]),
+        .a0(local_addr[0]), .a1(local_addr[1]),
+        .rn_w(local_rn_w),
+        .siz0(local_siz[0]), .siz1(local_siz[1]),
 
         .upper(upper), .lower(lower),
         .upper_upper(upper_upper), .upper_mid(upper_mid),
@@ -147,9 +164,9 @@ module MAXI030Core
     wire [`FUNCTION_SELECTED_MAXPOS-1:0] function_selected;
     function_decode function_decode
     (
-        .as(as),
-        .fc(fc),
-        .addr_middle(addr[19:16]),
+        .as(local_as),
+        .fc(local_fc),
+        .addr_middle(local_addr[19:16]),
         .fpu_sense(fpu_sense),
 
         .function_selected(function_selected)
@@ -163,9 +180,9 @@ module MAXI030Core
     (
         .function_normal_selected(function_selected[`FUNCTION_NORMAL_POS]),
         .vector_fetched(vector_fetched),
-        .addr_upper(addr[31:24]),
-        .addr_middle(addr[19:16]),
-        .addr_upper_lower(addr[15:8]),
+        .addr_upper(local_addr[31:24]),
+        .addr_middle(local_addr[19:16]),
+        .addr_upper_lower(local_addr[15:8]),
 
         .device_selected(device_selected),
         .port_width(port_width)
@@ -211,12 +228,13 @@ module MAXI030Core
     assign n_quart =    ~device_selected[`DEVICE_QUART_POS];
 
     // DSACK
-    assign n_dsack =    function_selected[`FUNCTION_FPU_POS] ? 2'bzz :
-                        quart_waitstate ? 2'b11 :
-                        rom_waitstate ? 2'b11 :
-                        eth_waitstate ? 2'b11 :
-                        simm_waitstate & device_selected[`DEVICE_SIMM_POS] ? 2'b11 :
+    wire [1:0] dsack =  quart_waitstate ? 2'b00 :
+                        rom_waitstate ? 2'b00 :
+                        eth_waitstate ? 2'b00 :
+                        simm_waitstate & device_selected[`DEVICE_SIMM_POS] ? 2'b00 :
                         port_width;
+
+    assign n_dsack = function_selected[`FUNCTION_FPU_POS] ? 2'bzz : ~dsack;
 
     // Misc
     assign p_reset = reset;
@@ -265,11 +283,11 @@ module MAXI030Core
         .clock(clock),
 
         .cs(device_selected[`DEVICE_SIMM_POS]),
-        .as(as),
-        .ds(ds),
-        .rn_w(rn_w),
-        .bank_addr(addr[10 + 11 + 3]),
-        .slot_addr(addr[10 + 11 + 3 + 1]),
+        .as(local_as),
+        .ds(local_ds),
+        .rn_w(local_rn_w),
+        .bank_addr(local_addr[10 + 11 + 3]),
+        .slot_addr(local_addr[10 + 11 + 3 + 1]),
         .byte_selects({ upper_upper, upper_mid, lower_mid, lower_lower }),
 
         .write(simm_write),
@@ -289,7 +307,7 @@ module MAXI030Core
     simm_mux simm_mux
     (
         .mux_select(simm_mux_select),
-        .addr_in(addr),
+        .addr_in(local_addr),
 
         .addr_out(simm_addr)
     );
@@ -299,8 +317,6 @@ module MAXI030Core
     assign n_halt = 1'b1;
     assign n_sterm = 1'b1;
     assign n_cback = 1'b1;
-    assign n_br = 1'b1;
-    assign n_bgack = 1'b1;
     // QUART
     assign n_quart_iack = 1'b1;
     // IDE
@@ -312,7 +328,7 @@ module MAXI030Core
     register8_decode register8_decode
     (
         .device_register8_selected(device_selected[`DEVICE_REGISTER8_POS]),
-        .addr_lower_lower(addr[7:0]),
+        .addr_lower_lower(local_addr[7:0]),
 
         .register8_selected(register8_selected)
     );
@@ -321,7 +337,7 @@ module MAXI030Core
     register16_decode register16_decode
     (
         .device_register16_selected(device_selected[`DEVICE_REGISTER16_POS]),
-        .addr_lower_lower(addr[7:0]),
+        .addr_lower_lower(local_addr[7:0]),
 
         .register16_selected(register16_selected)
     );
@@ -330,7 +346,7 @@ module MAXI030Core
     register32_decode register32_decode
     (
         .device_register32_selected(device_selected[`DEVICE_REGISTER32_POS]),
-        .addr_lower_lower(addr[7:0]),
+        .addr_lower_lower(local_addr[7:0]),
 
         .register32_selected(register32_selected)
     );
@@ -356,6 +372,7 @@ module MAXI030Core
         read & device_selected[`DEVICE_REGISTER16_POS] ?    { data16, 16'h0000 } :
         read & device_selected[`DEVICE_REGISTER32_POS] ?    data32 :
         read & device_selected[`DEVICE_BROM_POS] ?          brom_dout :
+        dmac_data_out_valid ? dmac_data_out :
         32'hzzzzzzzz;
 
     wire [7:0] led_data_out;
@@ -465,7 +482,7 @@ module MAXI030Core
     assign irqs_active[`INT_TIMER_POS] = timer_irq;
     assign irqs_active[`INT_QUART_POS] = ~n_quart_irq;
     assign irqs_active[`INT_IDE_POS] = ~n_ide_irq;
-    assign irqs_active[`INT_ETH_POS] = ~n_eth_int;
+    assign irqs_active[`INT_ETH_POS] = n_eth_int;
     assign irqs_active[`INT_PS2_POS] = 1'b0;
     wire [2:0] ipl;
     assign n_ipl = ~ipl;
@@ -486,6 +503,52 @@ module MAXI030Core
         .irqs_active(irqs_active),
         .ipl(ipl),
         .avec(avec)
+    );
+
+    wire [31:0] dmac_data_out;
+    wire dmac_data_out_valid;
+    wire br;
+    assign n_br = ~br;
+    wire bg;
+    assign bg = ~n_bg;
+    wire bgack;
+    assign n_bgack = ~bgack;
+
+    wire [31:0] dmac_addr;
+    wire dmac_rn_w;
+    wire dmac_as;
+    wire dmac_ds;
+    wire [1:0] dmac_siz;
+    wire [2:0] dmac_fc;
+    wire dmac_trace;
+    dmac_interface dmac_interface
+    (
+        .reset(reset),
+        .clock(clock),
+
+        .read(read),
+        .write(write),
+        .src_addr_cs(register32_selected[`REGISTER32_DMAC_SRC_ADDR_POS]),
+        .dst_addr_cs(register32_selected[`REGISTER32_DMAC_DST_ADDR_POS]),
+        .length_cs(register32_selected[`REGISTER32_DMAC_LENGTH_POS]),
+        .control_cs(register32_selected[`REGISTER32_DMAC_CONTROL_POS]),
+        .data_in(data),
+        .data_out(dmac_data_out),
+        .data_out_valid(dmac_data_out_valid),
+
+        .br(br),
+        .bg(bg),
+        .bgack(bgack),
+        .ext_as(as),
+        .addr(dmac_addr),
+        .rn_w(dmac_rn_w),
+        .as(dmac_as),
+        .ds(dmac_ds),
+        .siz(dmac_siz),
+        .fc(dmac_fc),
+        .dsack(dsack),
+
+        .trace(dmac_trace)
     );
 
     wire [31:0] timer_data_out;
@@ -509,14 +572,14 @@ module MAXI030Core
     );
 
     wire [31:0] brom_dout;
-    brom brom
-    (
-        .clock(clock),
+    // brom brom
+    // (
+    //     .clock(clock),
 
-        .addr(addr[10:2]),
+    //     .addr(addr[10:2]),
 
-        .dout(brom_dout)
-    );
+    //     .dout(brom_dout)
+    // );
 
     sys_clear_generator sys_clear_generator
     (
@@ -525,5 +588,7 @@ module MAXI030Core
         .sys_clear(sys_clear)
     );
 
-    assign user[2] = timer_irq;
+    assign user[2] = dmac_trace;
+    assign user[3] = clock;//register8_selected[`REGISTER8_LED_POS];
+
 endmodule
