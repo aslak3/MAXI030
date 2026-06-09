@@ -1,0 +1,200 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2013 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions
+# and other software and tools, and its AMPP partner logic
+# functions, and any output files from any of the foregoing
+# (including device programming or simulation files), and any
+# associated documentation or information are expressly subject
+# to the terms and conditions of the Altera Program License
+# Subscription Agreement, Altera MegaCore Function License
+# Agreement, or other applicable license agreement, including,
+# without limitation, that your use is for the sole purpose of
+# programming logic devices manufactured by Altera and sold by
+# Altera or its authorized distributors.  Please refer to the
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II 32-bit
+# Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
+# Date created = 12:58:37  June 09, 2021
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		videosound_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY "Cyclone II"
+set_global_assignment -name DEVICE EP2C8Q208C8
+set_global_assignment -name TOP_LEVEL_ENTITY VideoSoundCore
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "13.0 SP1"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "12:58:37  JUNE 09, 2021"
+set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name DEVICE_FILTER_PACKAGE "ANY QFP"
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 208
+set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 8
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
+set_location_assignment PIN_185 -to a[0]
+set_location_assignment PIN_182 -to a[1]
+set_location_assignment PIN_181 -to a[2]
+set_location_assignment PIN_180 -to a[3]
+set_location_assignment PIN_179 -to a[4]
+set_location_assignment PIN_176 -to a[5]
+set_location_assignment PIN_175 -to a[6]
+set_location_assignment PIN_173 -to a[7]
+set_location_assignment PIN_171 -to a[8]
+set_location_assignment PIN_170 -to a[9]
+set_location_assignment PIN_169 -to a[10]
+set_location_assignment PIN_168 -to a[11]
+set_location_assignment PIN_165 -to a[12]
+set_location_assignment PIN_164 -to a[13]
+set_location_assignment PIN_163 -to a[14]
+set_location_assignment PIN_162 -to a[15]
+set_location_assignment PIN_161 -to a[16]
+set_location_assignment PIN_160 -to a[17]
+set_location_assignment PIN_152 -to a[18]
+set_location_assignment PIN_151 -to a[19]
+set_location_assignment PIN_150 -to a[20]
+set_location_assignment PIN_149 -to a[21]
+set_location_assignment PIN_13 -to blue[0]
+set_location_assignment PIN_12 -to blue[1]
+set_location_assignment PIN_11 -to blue[2]
+set_location_assignment PIN_10 -to blue[3]
+set_location_assignment PIN_8 -to blue[4]
+set_location_assignment PIN_6 -to blue[5]
+set_location_assignment PIN_5 -to blue[6]
+set_location_assignment PIN_4 -to blue[7]
+set_location_assignment PIN_208 -to d[16]
+set_location_assignment PIN_207 -to d[17]
+set_location_assignment PIN_205 -to d[18]
+set_location_assignment PIN_203 -to d[19]
+set_location_assignment PIN_201 -to d[20]
+set_location_assignment PIN_200 -to d[21]
+set_location_assignment PIN_199 -to d[22]
+set_location_assignment PIN_198 -to d[23]
+set_location_assignment PIN_197 -to d[24]
+set_location_assignment PIN_195 -to d[25]
+set_location_assignment PIN_193 -to d[26]
+set_location_assignment PIN_192 -to d[27]
+set_location_assignment PIN_191 -to d[28]
+set_location_assignment PIN_189 -to d[29]
+set_location_assignment PIN_188 -to d[30]
+set_location_assignment PIN_187 -to d[31]
+set_location_assignment PIN_39 -to green[0]
+set_location_assignment PIN_37 -to green[1]
+set_location_assignment PIN_35 -to green[2]
+set_location_assignment PIN_34 -to green[3]
+set_location_assignment PIN_33 -to green[4]
+set_location_assignment PIN_31 -to green[5]
+set_location_assignment PIN_30 -to green[6]
+set_location_assignment PIN_15 -to green[7]
+set_location_assignment PIN_63 -to h_sync
+set_location_assignment PIN_146 -to n_berr
+set_location_assignment PIN_147 -to n_int
+set_location_assignment PIN_143 -to n_lcs
+set_location_assignment PIN_141 -to n_read
+set_location_assignment PIN_206 -to n_reset
+set_location_assignment PIN_144 -to n_ucs
+set_location_assignment PIN_14 -to n_vgablank
+set_location_assignment PIN_86 -to n_vlcs
+set_location_assignment PIN_82 -to n_vread
+set_location_assignment PIN_128 -to n_vwrite
+set_location_assignment PIN_145 -to n_wait
+set_location_assignment PIN_142 -to n_write
+set_location_assignment PIN_48 -to red[0]
+set_location_assignment PIN_47 -to red[1]
+set_location_assignment PIN_46 -to red[2]
+set_location_assignment PIN_45 -to red[3]
+set_location_assignment PIN_44 -to red[4]
+set_location_assignment PIN_43 -to red[5]
+set_location_assignment PIN_41 -to red[6]
+set_location_assignment PIN_40 -to red[7]
+set_location_assignment PIN_139 -to user_led
+set_location_assignment PIN_64 -to v_sync
+set_location_assignment PIN_110 -to va[0]
+set_location_assignment PIN_108 -to va[1]
+set_location_assignment PIN_107 -to va[2]
+set_location_assignment PIN_106 -to va[3]
+set_location_assignment PIN_105 -to va[4]
+set_location_assignment PIN_76 -to va[5]
+set_location_assignment PIN_77 -to va[6]
+set_location_assignment PIN_80 -to va[7]
+set_location_assignment PIN_81 -to va[8]
+set_location_assignment PIN_97 -to va[9]
+set_location_assignment PIN_99 -to va[10]
+set_location_assignment PIN_101 -to va[11]
+set_location_assignment PIN_102 -to va[12]
+set_location_assignment PIN_103 -to va[13]
+set_location_assignment PIN_104 -to va[14]
+set_location_assignment PIN_138 -to va[15]
+set_location_assignment PIN_137 -to va[16]
+set_location_assignment PIN_135 -to va[17]
+set_location_assignment PIN_134 -to va[18]
+set_location_assignment PIN_112 -to vd[0]
+set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+set_location_assignment PIN_87 -to vd[15]
+set_location_assignment PIN_88 -to vd[14]
+set_location_assignment PIN_89 -to vd[13]
+set_location_assignment PIN_90 -to vd[12]
+set_location_assignment PIN_92 -to vd[11]
+set_location_assignment PIN_94 -to vd[10]
+set_location_assignment PIN_95 -to vd[9]
+set_location_assignment PIN_96 -to vd[8]
+set_location_assignment PIN_127 -to vd[7]
+set_location_assignment PIN_118 -to vd[6]
+set_location_assignment PIN_117 -to vd[5]
+set_location_assignment PIN_116 -to vd[4]
+set_location_assignment PIN_115 -to vd[3]
+set_location_assignment PIN_114 -to vd[2]
+set_location_assignment PIN_113 -to vd[1]
+set_location_assignment PIN_3 -to dac_clock
+set_location_assignment PIN_130 -to master_clock
+set_location_assignment PIN_129 -to mpu_clock
+set_location_assignment PIN_131 -to video_clock
+set_location_assignment PIN_133 -to va[19]
+set_location_assignment PIN_61 -to i2s_bclk
+set_location_assignment PIN_59 -to i2s_datai
+set_location_assignment PIN_67 -to i2s_deem_clk_out
+set_location_assignment PIN_69 -to i2s_for[0]
+set_location_assignment PIN_57 -to i2s_for[1]
+set_location_assignment PIN_56 -to i2s_mute
+set_location_assignment PIN_68 -to i2s_pll0
+set_location_assignment PIN_58 -to i2s_sync_clk_pll1
+set_location_assignment PIN_60 -to i2s_ws
+set_location_assignment PIN_75 -to userio[0]
+set_location_assignment PIN_74 -to userio[1]
+set_location_assignment PIN_70 -to userio[3]
+set_location_assignment PIN_72 -to userio[2]
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name LL_ROOT_REGION ON -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -section_id "Root Region"
+set_location_assignment PIN_84 -to n_vucs
+set_global_assignment -name ENABLE_DEVICE_WIDE_RESET OFF
+set_global_assignment -name FMAX_REQUIREMENT "25 MHz" -section_id "MPU Clock"
+set_instance_assignment -name CLOCK_SETTINGS "MPU Clock" -to mpu_clock
+set_global_assignment -name STRATIX_CONFIGURATION_DEVICE EPCS4
+set_global_assignment -name VERILOG_FILE VideoSoundCore.v
+set_global_assignment -name VERILOG_FILE i2s.v
+set_global_assignment -name VERILOG_FILE brom.v
+set_global_assignment -name VERILOG_FILE sram_controller.v
+set_global_assignment -name VERILOG_FILE dual_clock_fifo.v
+set_global_assignment -name VERILOG_FILE video.v
