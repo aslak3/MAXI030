@@ -34,6 +34,8 @@ module dmac_interface
     reg [31:0] dst_addr;
     reg [15:0] length;
     reg trigger;
+    reg src_io;
+    reg dst_io;
 
     always @ (*) begin
         if (src_addr_cs) begin
@@ -45,7 +47,7 @@ module dmac_interface
         end else if (bgack && !rn_w && ds) begin
             data_out = dmac_data_out;
         end else begin
-            data_out = 32'h87654321;
+            data_out = 32'h0;
         end
     end
 
@@ -57,7 +59,10 @@ module dmac_interface
         if (reset) begin
             src_addr <= 32'h0;
             dst_addr <= 32'h0;
-            length <= 'h0;
+            length <= 16'h0;
+            trigger <= 1'b0;
+            src_io <= 1'b0;
+            dst_io <= 1'b0;
         end else begin
             trigger <= 1'b0;
 
@@ -70,6 +75,8 @@ module dmac_interface
                     length <= data_in [15:0];
                 end else if (control_cs) begin
                     trigger <= data_in[0];
+                    src_io <= data_in[1];
+                    dst_io <= data_in[2];
                 end
             end
         end
@@ -77,10 +84,12 @@ module dmac_interface
 
     wire [31:0] dmac_data_out;
     dmac dmac (
-		.clock(clock),
-		.reset(reset),
+        .clock(clock),
+        .reset(reset),
 
-		.trigger(trigger),
+        .trigger(trigger),
+        .src_io(src_io),
+        .dst_io(dst_io),
         .src_addr(src_addr),
         .dst_addr(dst_addr),
         .length(length),
