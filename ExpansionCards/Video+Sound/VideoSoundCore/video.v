@@ -5,9 +5,13 @@ module video_sync
         output reg  v_sync,
         output      h_visible,
         output      v_visible,
+
         output      [9:0] h_count,
         output      [9:0] v_count,
-        output      [9:0] frame_count
+        output      [9:0] frame_count,
+        
+        output      line_start,
+        output      frame_start
     );
 
     reg [9:0] h;
@@ -29,7 +33,7 @@ module video_sync
 		end
 
 		// AKA H sync
-		if (h > 640 + 16 + 16 && h <= 640 + 16 + 96 - 16) begin
+		if (h > 640 + 16 && h < 640 + 16 + 96) begin
 			h_sync <= 0;
         end else begin
 			h_sync <= 1;
@@ -43,10 +47,13 @@ module video_sync
 		end
     end
 
-    assign h_visible = h > 16 && h <= 640 + 16 ? 1 : 0;
-    assign v_visible = v < 480 ? 1 : 0;
+    assign h_visible = h < 640;
+    assign v_visible = v < 480;
 
     assign h_count = h;
     assign v_count = v;
     assign frame_count = frame;
+    
+    assign line_start = h == 640 && v < 480;
+    assign frame_start = h == 0 && v == 0;
 endmodule

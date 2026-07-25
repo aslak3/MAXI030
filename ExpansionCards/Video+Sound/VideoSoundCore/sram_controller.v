@@ -3,8 +3,11 @@ module sram_controller
         input       reset,
         input       clock,
 
-        // Display interface
-        
+        // Display FIFO interface
+        input       [20:1] fifo_addr,
+        input       fifo_read_trigger,
+        output reg  [15:0] fifo_data_out,
+        output reg  fifo_data_out_valid,
 
         // CPU interface
         input       [20:1] cpu_addr,
@@ -28,13 +31,13 @@ module sram_controller
         inout       [15:0] sram_data
     );
 
-    localparam IDLE = 0;
-    localparam READ_LATCH = 1;
-    localparam WAIT_THEN_IDLE = 2;
-    localparam EXTRA_WAIT = 3;
-    localparam EXTRA_WAIT_2 = 4;
+    typedef enum reg [2:0] {
+        IDLE,
+        FIFO_READ_WAIT, FIFO_READ_LATCH,
+        CPU_READ_WAIT, CPU_READ_LATCH, CPU_WAIT_THEN_IDLE
+    } state_t;
 
-    reg [2:0] state = IDLE;
+    state_t state = IDLE;
 
     always @ (posedge clock) begin
         if (reset) begin
@@ -42,30 +45,39 @@ module sram_controller
             sram_n_vread <= 1'b1;
             sram_n_ucs <= 1'b1;
             sram_n_lcs <= 1'b1;
+            fifo_data_out_valid <= 1'b0;
             cpu_data_out_valid <= 1'b0;
 
             state <= IDLE;
         end else begin
             case (state)
                 IDLE: begin
+                    fifo_data_out_valid <= 1'b0;
+                    cpu_read_ack <= 1'b0;
+                    cpu_write_ack <= 1'b0;
                     cpu_busy <= 1'b1;
                     cpu_data_out_valid <= 1'b0;
-
                     sram_n_vwrite <= 1'b1;
                     sram_n_vread <= 1'b1;
                     sram_n_ucs <= 1'b1;
                     sram_n_lcs <= 1'b1;
-                    cpu_read_ack <= 1'b0;
-                    cpu_write_ack <= 1'b0;
-
-                    if (cpu_read_trigger) begin
+                    
+                    if (fifo_read_trigger) begin
+                        sram_addr <= fifo_addr;
+                        sram_n_vwrite <= 1'b1;
+                        sram_n_vread <= 1'b0;
+                        sram_n_ucs <= 1'b0;
+                        sram_n_lcs <= 1'b0;
+                    
+                        state <= FIFO_READ_WAIT;
+                    end else if (cpu_read_trigger) begin
                         sram_addr <= cpu_addr;
                         sram_n_vwrite <= 1'b1;
                         sram_n_vread <= 1'b0;
                         sram_n_ucs <= 1'b0;
                         sram_n_lcs <= 1'b0;
 
-                        state <= EXTRA_WAIT;
+                        state <= CPU_READ_WAIT;
                     end else if (cpu_write_trigger) begin
                         sram_addr <= cpu_addr;
                         sram_n_vwrite <= 1'b0;
@@ -73,7 +85,7 @@ module sram_controller
                         sram_n_ucs <= ~cpu_ucs;
                         sram_n_lcs <= ~cpu_lcs;
 
-                        state <= WAIT_THEN_IDLE;
+                        state <= CPU_WAIT_THEN_IDLE;
                     end else begin
                         sram_n_vwrite <= 1'b1;
                         sram_n_vread <= 1'b1;
@@ -81,19 +93,30 @@ module sram_controller
                         state <= IDLE;
                     end
                 end
-
-                EXTRA_WAIT: begin
-                    state <= READ_LATCH;
+                
+                FIFO_READ_WAIT: begin
+                    state <= FIFO_READ_LATCH;
+                end
+                
+                FIFO_READ_LATCH: begin
+                    fifo_data_out <= { sram_data[7:0], sram_data[15:8] };
+                    fifo_data_out_valid <= 1'b1;
+                    
+                    state <= IDLE;
                 end
 
-                READ_LATCH: begin
-                    cpu_data_out_valid <= 1'b1;
+                CPU_READ_WAIT: begin
+                    state <= CPU_READ_LATCH;
+                end
+
+                CPU_READ_LATCH: begin
                     cpu_data_out <= sram_data;
+                    cpu_data_out_valid <= 1'b1;
 
-                    state <= WAIT_THEN_IDLE;
+                    state <= CPU_WAIT_THEN_IDLE;
                 end
 
-                WAIT_THEN_IDLE: begin
+                CPU_WAIT_THEN_IDLE: begin
                     // This will clear the triggers in the parent.
                     cpu_read_ack <= 1'b1;
                     cpu_write_ack <= 1'b1;
@@ -104,6 +127,9 @@ module sram_controller
                         cpu_busy <= 1'b1;
                         state <= IDLE;
                     end
+                end
+                
+                default: begin
                 end
             endcase
         end

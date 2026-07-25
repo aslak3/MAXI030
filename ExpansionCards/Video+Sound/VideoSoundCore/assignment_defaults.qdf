@@ -151,7 +151,8 @@ set_global_assignment -name DEVICE_FILTER_PACKAGE Any
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT Any
 set_global_assignment -name DEVICE_FILTER_SPEED_GRADE Any
 set_global_assignment -name EDA_DESIGN_ENTRY_SYNTHESIS_TOOL "<None>"
-set_global_assignment -name VERILOG_INPUT_VERSION Verilog_2001
+#set_global_assignment -name VERILOG_INPUT_VERSION Verilog_2001
+set_global_assignment -name VERILOG_INPUT_VERSION SystemVerilog_2005
 set_global_assignment -name VHDL_INPUT_VERSION VHDL93
 set_global_assignment -name FAMILY "Stratix II"
 set_global_assignment -name TRUE_WYSIWYG_FLOW Off

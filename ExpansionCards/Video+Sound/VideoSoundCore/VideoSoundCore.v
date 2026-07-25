@@ -67,34 +67,34 @@ module VideoSoundCore
 
     reg read_s__, read_s_;
     reg write_s__, write_s_;
-    reg [21:0] addr_s__; reg [21:0] addr_s_;
-    reg ucs_s__, ucs_s_;
-    reg lcs_s__, lcs_s_;
-    reg [15:0] data_in_s__; reg [15:0] data_in_s_;
+    // reg [21:0] addr_s__; reg [21:0] addr_s_;
+    // reg ucs_s__, ucs_s_;
+    // reg lcs_s__, lcs_s_;
+    // reg [15:0] data_in_s__; reg [15:0] data_in_s_;
 
     // Stabilise (video_clock -> mpu_clock) through 2 FF.
     always @ (posedge video_clock) begin
         read_s__ <= read;
         write_s__ <= write;
-        addr_s__ <= a;
-        ucs_s__ <= ucs;
-        lcs_s__ <= lcs;
-        data_in_s__ <= d;
+        // addr_s__ <= a;
+        // ucs_s__ <= ucs;
+        // lcs_s__ <= lcs;
+        // data_in_s__ <= d;
 
         read_s_ <= read_s__;
         write_s_ <= write_s__;
-        addr_s_ <= addr_s__;
-        ucs_s_ <= ucs_s__;
-        lcs_s_ <= lcs_s__;
-        data_in_s_ <= data_in_s__;
+        // addr_s_ <= addr_s__;
+        // ucs_s_ <= ucs_s__;
+        // lcs_s_ <= lcs_s__;
+        // data_in_s_ <= data_in_s__;
     end
 
     wire read_s = read_s_;
     wire write_s = write_s_;
-    wire [21:0] addr = addr_s_;
-    wire ucs_s = ucs_s_;
-    wire lcs_s = lcs_s_;
-    wire [15:0] data_in_s = data_in_s_;
+    // wire [21:0] addr = addr_s_;
+    // wire ucs_s = ucs_s_;
+    // wire lcs_s = lcs_s_;
+    // wire [15:0] data_in_s = data_in_s_;
 
     reg read_trigger, write_trigger;
     wire read_ack, write_ack;
@@ -102,28 +102,65 @@ module VideoSoundCore
     always @ (posedge video_clock) begin
         if (read_ack) begin
             read_trigger <= 1'b0;
-        end else if (read_s && (ucs_s || lcs_s)) begin
+        end else if (read_s && (ucs || lcs)) begin
             read_trigger <= 1'b1;
         end
 
         if (write_ack) begin
             write_trigger <= 1'b0;
-        end else if (write_s && (ucs_s || lcs_s)) begin
+        end else if (write_s && (ucs || lcs)) begin
             write_trigger <= 1'b1;
         end
     end
 
+    reg fifo_read_trigger = 1'b0;
+    reg [20:1] fifo_addr = 20'd0;
+    reg [9:0] column_countdown = 10'd0;
+    
+    always @ (posedge video_clock) begin
+        if (reset) begin
+            column_countdown <= 10'd0;
+            fifo_addr <= 20'd0;
+        end else begin
+            if (frame_start) begin
+                column_countdown <= 10'd0;
+                fifo_addr <= 20'd35;
+            end
+            if (line_start) begin
+                column_countdown <= 10'd640;
+                fifo_read_trigger <= 1'b1;
+            end
+            if (fifo_data_out_valid) begin
+                if (column_countdown != 10'd0) begin
+                    fifo_read_trigger <= 1'b1;
+                    fifo_addr <= fifo_addr + 20'd1;
+                    column_countdown <= column_countdown - 10'd1;
+                end else begin
+                    fifo_read_trigger <= 1'b0;
+                end
+            end
+        end
+    end
+    
+    reg [15:0] fifo_data_out;
+    reg fifo_data_out_valid;
+    
     sram_controller sram_controller
     (
         .reset(reset),
         .clock(video_clock),
+        
+        .fifo_addr(fifo_addr),
+        .fifo_read_trigger(fifo_read_trigger),
+        .fifo_data_out(fifo_data_out),
+        .fifo_data_out_valid(fifo_data_out_valid),
 
-        .cpu_addr(addr[20:1]),
+        .cpu_addr(a[20:1]),
         .cpu_read_trigger(read_trigger),
         .cpu_write_trigger(write_trigger),
-        .cpu_ucs(ucs_s),
-        .cpu_lcs(lcs_s),
-        .cpu_data_in(data_in_s),
+        .cpu_ucs(ucs),
+        .cpu_lcs(lcs),
+        .cpu_data_in(d),
         .cpu_data_out(data_out),
         .cpu_data_out_valid(data_out_valid),
         .cpu_read_ack(read_ack),
@@ -136,6 +173,27 @@ module VideoSoundCore
         .sram_n_ucs(n_vucs),
         .sram_n_lcs(n_vlcs),
         .sram_data(vd)
+    );
+
+    reg [15:0] pixel_data;
+    reg fifo_full, fifo_empty;
+    dual_clock_fifo #(
+        .DEPTH(1024),
+        .WIDTH(16),
+        .PTR_WIDTH(10)
+    ) dual_clock_fifo (
+        .wr_clk(video_clock),
+        .wr_rst_n(n_reset),
+        .wr_en(fifo_data_out_valid),
+        .din(fifo_data_out),
+        
+        .rd_clk(dac_clock),
+        .rd_rst_n(n_reset),
+        .rd_en(h_visible & v_visible),
+        .dout(pixel_data),
+        
+        .full(fifo_full),
+        .empty(fifo_empty)
     );
     
     reg [1:0] video_clock_div;
@@ -150,35 +208,44 @@ module VideoSoundCore
     wire [9:0] h_count;
     wire [9:0] v_count;
     wire [9:0] frame_count;
+    wire line_start;
+    wire frame_start;
     video_sync video_sync
     (
         .clock(dac_clock),
         
         .h_sync(h_sync),
         .v_sync(v_sync),
+        
         .h_visible(h_visible),
         .v_visible(v_visible),
         .h_count(h_count),
         .v_count(v_count),
-        .frame_count(frame_count)
+        .frame_count(frame_count),
+        
+        .line_start(line_start),
+        .frame_start(frame_start)
     );
     
-    always @ (posedge dac_clock) begin
+    always @ (negedge video_clock) begin
         if (h_visible && v_visible) begin
-            if (v_count < 160) begin
-                red <= 8'hff; green <= 8'h00; blue <= 8'h00;
-            end else if (v_count < 320) begin
-                red <= 8'h00; green <= 8'hff; blue <= 8'h00;
-            end else begin
-                red <= 8'h00; green <= 8'h00; blue <= 8'hff;
-            end
+            // red <= h_count[8:1];
+            // green <= h_count[8:1];
+            // blue <= h_count[8:1];
+            // red <= pixel_data[15:8];
+            // green <= pixel_data[15:8];
+            // blue <= pixel_data[15:8];
+            red <= { pixel_data[15:11], 3'd0 };
+            green <= { pixel_data[10:5], 2'd0 };
+            blue <= { pixel_data[4:0], 3'd0 };
+
         end else begin
             red <= 8'h00; green <= 8'h00; blue <= 8'h00;
         end
     end
     
     // Read out the SRAM data if we are selected and reading.
-    assign d = read_s && (ucs_s || lcs_s) ? data_out : 16'hzzzz;
+    assign d = read_s && (ucs || lcs) ? data_out : 16'hzzzz;
 
     // Pass through mapping
     // assign d = (ucs | lcs) & read ? vd : 16'hzzzz;
@@ -192,9 +259,6 @@ module VideoSoundCore
 
     assign n_wait = sram_controller_busy ? 1'b0 : 1'b1;
     assign n_berr = 1'b1;
-
-    reg [1:0] counter;
-    always @ (posedge video_clock) begin
-        counter <= counter + 2'b01;
-    end
+    
+    assign user_led = n_reset;
 endmodule

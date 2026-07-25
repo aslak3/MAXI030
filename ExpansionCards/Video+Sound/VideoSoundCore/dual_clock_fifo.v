@@ -106,7 +106,7 @@ module dual_clock_fifo #(
     //=================================================================
     //  6. Write logic (write clock domain)
     //=================================================================
-    always @(posedge wr_clk or negedge wr_rst_n) begin
+    always @(posedge wr_clk) begin
         if (!wr_rst_n) begin
             wr_ptr_bin <= {PTR_WIDTH{1'b0}};
         end else if (wr_en && !full) begin
@@ -118,12 +118,12 @@ module dual_clock_fifo #(
     //=================================================================
     //  7. Read logic (read clock domain)
     //=================================================================
-    always @(posedge rd_clk or negedge rd_rst_n) begin
+    always @(posedge rd_clk) begin
         if (!rd_rst_n) begin
             rd_ptr_bin <= {PTR_WIDTH{1'b0}};
             dout      <= {WIDTH{1'b0}};
         end else if (rd_en && !empty) begin
-            dout      <= mem[rd_ptr_bin];     // read data
+            dout     <= mem[rd_ptr_bin];     // read data
             rd_ptr_bin <= rd_ptr_bin + 1'b1;   // advance read pointer
         end
     end

@@ -7,7 +7,7 @@ DIR=VideoSoundCore
 PROJECT=VideoSoundCore
 
 VERILATOR_LINT=verilator --lint-only --timing
-IVERILOG = iverilog -g 2012 -g io-range-error -Wall
+IVERILOG = iverilog -g2005-sv -g io-range-error -Wall
 VVP = vvp
 
 V_SRC = VideoSoundCore.v \
@@ -27,7 +27,7 @@ tests: $(ALL_TESTBENCHES)
 	set -e; for T in $^; do $(VVP) $$T; done
 
 verilate: $(V_SRC)
-	$(VERILATOR_LINT) $^
+	$(VERILATOR_LINT) --top-module VideoSoundCore $^
 
 all: verilate
 	rsync --delete -vr . $(TARGET_HOST):$(DIR)
