@@ -19,7 +19,7 @@ module interrupts_interface
         output      avec
     );
 
-    reg [`INT_MAXPOS-1:0] ints_enabled;
+    reg [`INT_MAXPOS-1:0] ints_enabled = { `INT_MAXPOS { 1'b0 } };
 
     always @ (*) begin
         if (cs) begin
