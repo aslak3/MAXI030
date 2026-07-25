@@ -46,7 +46,7 @@ module MAXI030Core
         output      [2:0] n_ipl,
         output      n_avec,
 
-        // SIMM slot
+        // SIMM slots
         output      n_simm,
         output      [3:0] n_ras0,
         output      [3:0] n_ras1,
@@ -72,7 +72,7 @@ module MAXI030Core
 
         // IDE
         output      n_ide,
-        input       n_ide_irq,
+        input       ide_irq,
         output      n_ide1,
         output      n_ide3,
         input       n_ide_ready,
@@ -83,7 +83,7 @@ module MAXI030Core
 
         // Ethernet
         output      n_eth,
-        input       n_eth_int,
+        input       eth_int,
 
         // I2C
         inout       scl,
@@ -135,6 +135,9 @@ module MAXI030Core
 
     wire read = local_ds & local_rn_w;
     wire write = local_ds & ~local_rn_w;
+
+    wire waite = ~n_waite;
+    wire berre = ~n_berre;
 
     assign n_read = ~read;
     assign n_write = ~write;
@@ -200,7 +203,7 @@ module MAXI030Core
 
     wire rom_waitstate;
     waitstate_generator #(
-        .DELAY(4'h2)
+        .DELAY(4'h1)
     ) rom_waitstate_generator (
         .clock(clock),
         .cs(device_selected[`DEVICE_ROM_POS]),
@@ -228,10 +231,14 @@ module MAXI030Core
     assign n_quart =    ~device_selected[`DEVICE_QUART_POS];
 
     // DSACK
-    wire [1:0] dsack =  quart_waitstate ? 2'b00 :
+    wire [1:0] dsack =  waite && (
+                            device_selected[`DEVICE_SLOT0_POS] || device_selected[`DEVICE_SLOT1_POS] ||
+                            device_selected[`DEVICE_SLOT2_POS] || device_selected[`DEVICE_SLOT3_POS]
+                        ) ? 2'b00 :
+                        quart_waitstate ? 2'b00 :
                         rom_waitstate ? 2'b00 :
                         eth_waitstate ? 2'b00 :
-                        simm_waitstate & device_selected[`DEVICE_SIMM_POS] ? 2'b00 :
+                        simm_waitstate && device_selected[`DEVICE_SIMM_POS] ? 2'b00 :
                         port_width;
 
     assign n_dsack = function_selected[`FUNCTION_FPU_POS] ? 2'bzz : ~dsack;
@@ -249,27 +256,31 @@ module MAXI030Core
     assign n_lcse[2] = ~(device_selected[`DEVICE_SLOT2_POS] & lower);
     assign n_lcse[3] = ~(device_selected[`DEVICE_SLOT3_POS] & lower);
     // Expansion bidirectional data buffer enables
-    assign n_uexp = ~(upper & ds & (
+    assign n_uexp = (~(
         device_selected[`DEVICE_SLOT0_POS] | device_selected[`DEVICE_SLOT1_POS] |
         device_selected[`DEVICE_SLOT2_POS] | device_selected[`DEVICE_SLOT3_POS]
     ));
-    assign n_lexp = ~(lower & ds & (
+    assign n_lexp = (~(
         device_selected[`DEVICE_SLOT0_POS] | device_selected[`DEVICE_SLOT1_POS] |
         device_selected[`DEVICE_SLOT2_POS] | device_selected[`DEVICE_SLOT3_POS]
     ));
     assign n_iacke[3:0] = 4'hf;
 
-    // Cache inhibit: cache enable only on the SIMM and flash
-    assign n_ciin = (device_selected[`DEVICE_SIMM_POS] | device_selected[`DEVICE_ROM_POS]);
+    // Cache inhibit: cache enable only on the SIMM and flash when FPGA isn't the master
+    assign n_ciin = ~bgack & (device_selected[`DEVICE_SIMM_POS] | device_selected[`DEVICE_ROM_POS]);
 
     // Bus error occurs either when no device is selected, or a register bank is selected but no
     // registers
-    assign n_berr = function_selected[`FUNCTION_NORMAL_POS] & (
-        (device_selected == `DEVICE_NULL) |
-        (device_selected[`DEVICE_REGISTER8_POS] & register8_selected == `REGISTER8_NULL) |
-        (device_selected[`DEVICE_REGISTER16_POS] & register16_selected == `REGISTER16_NULL) |
-        (device_selected[`DEVICE_REGISTER32_POS] & register32_selected == `REGISTER32_NULL)
-        ) ? 1'b0 : 1'b1;
+    assign n_berr = 1'b1;
+        // (function_selected[`FUNCTION_NORMAL_POS] & device_selected == `DEVICE_NULL) |
+        // (device_selected[`DEVICE_REGISTER8_POS] & register8_selected == `REGISTER8_NULL) |
+        // (device_selected[`DEVICE_REGISTER16_POS] & register16_selected == `REGISTER16_NULL) |
+        // (device_selected[`DEVICE_REGISTER32_POS] & register32_selected == `REGISTER32_NULL) |
+        // (berre & (
+        //     device_selected[`DEVICE_SLOT0_POS] | device_selected[`DEVICE_SLOT1_POS] |
+        //     device_selected[`DEVICE_SLOT2_POS] | device_selected[`DEVICE_SLOT3_POS]
+        // )
+        // ) ? 1'b0 : 1'b1;
 
     wire [3:0] simm_ras0;
     wire [3:0] simm_ras1;
@@ -391,7 +402,7 @@ module MAXI030Core
 
         .led(led)
     );
-
+    
     wire [15:0] tonegen_data_out;
     wire tonegen_data_out_valid;
     tonegen_interface tonegen_interface
@@ -411,18 +422,18 @@ module MAXI030Core
         .buzzer(buzzer)
     );
 
-    spi_interface spi_interface
-    (
-        .reset(reset),
-        .clock(clock),
+    // spi_interface spi_interface
+    // (
+    //     .reset(reset),
+    //     .clock(clock),
 
-        .write(write),
-        .cs(register8_selected[`REGISTER8_SPI_DATA_POS]),
-        .data_in(data[31:24]),
+    //     .write(write),
+    //     .cs(register8_selected[`REGISTER8_SPI_DATA_POS]),
+    //     .data_in(data[31:24]),
 
-        .sclk(user[0]),
-        .mosi(user[1])
-    );
+    //     .sclk(user[0]),
+    //     .mosi(user[1])
+    // );
 
     wire [7:0] i2c_data_out;
     wire i2c_data_out_valid;
@@ -481,8 +492,8 @@ module MAXI030Core
     wire [`INT_MAXPOS-1:0] irqs_active;
     assign irqs_active[`INT_TIMER_POS] = timer_irq;
     assign irqs_active[`INT_QUART_POS] = ~n_quart_irq;
-    assign irqs_active[`INT_IDE_POS] = ~n_ide_irq;
-    assign irqs_active[`INT_ETH_POS] = n_eth_int;
+    assign irqs_active[`INT_IDE_POS] = ide_irq;
+    assign irqs_active[`INT_ETH_POS] = eth_int;
     assign irqs_active[`INT_PS2_POS] = 1'b0;
     wire [2:0] ipl;
     assign n_ipl = ~ipl;
@@ -588,7 +599,5 @@ module MAXI030Core
         .sys_clear(sys_clear)
     );
 
-    assign user[2] = dmac_trace;
-    assign user[3] = clock;//register8_selected[`REGISTER8_LED_POS];
-
+    assign user[0] = bgack;
 endmodule

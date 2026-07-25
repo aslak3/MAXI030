@@ -135,7 +135,7 @@ set_location_assignment PIN_120 -to n_ds
 set_location_assignment PIN_191 -to n_dsack[1]
 set_location_assignment PIN_192 -to n_dsack[0]
 set_location_assignment PIN_25 -to n_eth
-set_location_assignment PIN_14 -to n_eth_int
+set_location_assignment PIN_14 -to eth_int
 set_location_assignment PIN_199 -to n_fpu
 set_location_assignment PIN_200 -to n_fpu_sense
 set_location_assignment PIN_131 -to n_halt
@@ -148,7 +148,7 @@ set_location_assignment PIN_34 -to n_ide1
 set_location_assignment PIN_33 -to n_ide3
 set_location_assignment PIN_240 -to n_ide_dma_ack
 set_location_assignment PIN_236 -to n_ide_dma_req
-set_location_assignment PIN_31 -to n_ide_irq
+set_location_assignment PIN_31 -to ide_irq
 set_location_assignment PIN_210 -to n_ide_ready
 set_location_assignment PIN_228 -to n_inte[3]
 set_location_assignment PIN_229 -to n_inte[2]
