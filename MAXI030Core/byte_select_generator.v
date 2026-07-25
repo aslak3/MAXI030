@@ -1,3 +1,6 @@
+// This is a direct "port" of the schematic at Figure 7-18 of the MC68020 UM, with the
+// exception that a read operation (rn_w == 1'b1) sets the outputs high.
+
 module byte_select_generator
     (
         input a0, a1,
