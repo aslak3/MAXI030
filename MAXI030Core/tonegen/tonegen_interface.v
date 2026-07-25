@@ -33,9 +33,7 @@ module tonegen_interface
                 if (duration_cs) begin
                     duration <= data_in;
                     tone_start <= 1'b1;
-                end
-
-                if (period_cs) begin
+                end else if (period_cs) begin
                     period <= data_in;
                 end
             end

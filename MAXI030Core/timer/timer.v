@@ -28,6 +28,7 @@ module timer
                 end
             end else if (stop_trigger) begin
                 running <= 1'b0;
+                irq <= 1'b0;
             end else if (running) begin
                 current_value <= current_value - 32'd1;
                 if (current_value == 32'd0) begin
